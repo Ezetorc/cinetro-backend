@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Movie {
+  id             Int              @id @default(autoincrement())
+  title          String
+  duration       Int
+  thumbnail      String?
+  trailer        String?
+  classification Classification
+  description    String
+  distributor    String
+  releaseDate    DateTime         @map("release_date")
+  
+  categories     Movie_Category[]
+  screenings     Screening[]
+
+  @@map("movies")
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  movies Movie_Category[]
+
+  @@map("categories")
+}
+
+model Movie_Category {
+  movieId    Int @map("movie_id")
+  categoryId Int @map("category_id")
+
+  movie    Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([movieId, categoryId])
+  @@map("movie_categories")
+}
+
+model Cinema {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String
+  latitude  Decimal? @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(11, 8)
+  rooms     Room[]
+  User      User[]
+
+  @@map("cinemas")
+}
+
+model Room {
+  id          Int    @id @default(autoincrement())
+  cinemaId    Int    @map("cinema_id")
+  seatRows    Int    @map("seat_rows")
+  seatColumns Int    @map("seat_columns")
+  name        String
+
+  cinema     Cinema      @relation(fields: [cinemaId], references: [id])
+  seats      Seat[]
+  screenings Screening[]
+
+  @@map("rooms")
+}
+
+model Seat {
+  id     Int    @id @default(autoincrement())
+  roomId Int    @map("room_id")
+  row    String @db.Char(1)
+  number Int
+
+  room    Room     @relation(fields: [roomId], references: [id])
+  tickets Ticket[]
+
+  @@map("seats")
+}
+
+model Screening {
+  id        Int      @id @default(autoincrement())
+  movieId   Int      @map("movie_id")
+  roomId    Int      @map("room_id")
+  startTime DateTime @map("start_time")
+  format    Format
+
+  movie   Movie    @relation(fields: [movieId], references: [id])
+  room    Room     @relation(fields: [roomId], references: [id])
+  tickets Ticket[]
+
+  @@map("screenings")
+}
+
+model Ticket {
+  id          Int           @id @default(autoincrement())
+  userId      Int           @map("user_id")
+  seatId      Int           @map("seat_id")
+  screeningId Int           @map("screening_id")
+  status      TicketStatus? @default(reserved)
+  reservedAt  DateTime?     @default(now()) @map("reserved_at")
+  screening   Screening     @relation(fields: [screeningId], references: [id])
+  seat        Seat          @relation(fields: [seatId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@unique([seatId, screeningId])
+  @@map("tickets")
+}
+
+model User {
+  id                Int      @id @default(autoincrement())
+  name              String
+  surname           String
+  password          String
+  email             String   @unique
+  birthDate         DateTime @map("birth_date") @db.Date
+  phoneNumber       String   @map("phone_number")
+  preferredCinemaId Int?     @map("preferred_cinema_id")
+  genre             Genre
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  preferredCinema Cinema?  @relation(fields: [preferredCinemaId], references: [id])
+  tickets         Ticket[]
+
+  @@map("users")
+}
+
+generator dto {
+  provider         = "prisma-dto-generator"
+  output           = "./src/generated/dtos"
+  createDtoPrefix  = "Create"
+  updateDtoPrefix  = "Update"
+  excludeRelations = false
+}
+
+enum Genre {
+  male
+  female
+  other
+  undisclosed
+}
+
+enum Classification {
+  ATP
+  THIRDTEEN @map("+13")
+  SIXTEEN   @map("+16")
+  EIGHTEEN  @map("+18")
+  SAM13
+  SAM16
+}
+
+enum Format {
+  TWO_D   @map("2D")
+  THREE_D @map("3D")
+}
+
+enum TicketStatus {
+  reserved
+  sold
+  cancelled
+}
