@@ -1,21 +1,24 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { PORT } from './settings'
+import { PORT, SWAGGER_CONFIG } from './settings'
 import { ValidationPipe } from '@nestjs/common'
-import { HttpExceptionFilter } from './common/filters/httpException.filter'
+import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ResponseInterceptor } from './common/interceptors/response.interceptor'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { SwaggerModule } from '@nestjs/swagger'
+import { disableHeader } from './common/utilities/disable-header.utility'
+import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
-async function bootstrap () {
-  const app = await NestFactory.create(AppModule)
+NestFactory.create(AppModule).then(app => {
+  const swaggerDocument = SwaggerModule.createDocument(app, SWAGGER_CONFIG)
+  const theme = new SwaggerTheme()
+  const options = {
+    explorer: true,
+    customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+  }
 
-  const config = new DocumentBuilder()
-    .setTitle('Cinemax')
-    .setDescription('Cinema tickets shop API')
-    .setVersion('1.0')
-    .build()
-  const documentFactory = () => SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, documentFactory)
+  SwaggerModule.setup('docs', app, swaggerDocument, options)
+
+  disableHeader(app, 'x-powered-by')
 
   app
     .useGlobalInterceptors(new ResponseInterceptor())
@@ -23,5 +26,4 @@ async function bootstrap () {
     .useGlobalPipes(new ValidationPipe({ whitelist: true }))
     .useGlobalInterceptors()
     .listen(PORT)
-}
-bootstrap()
+})

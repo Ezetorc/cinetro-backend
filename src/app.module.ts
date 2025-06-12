@@ -1,15 +1,38 @@
 import { Module } from '@nestjs/common'
-import { MoviesModule } from './movies/movies.module'
-import { CategoriesModule } from './categories/categories.module';
-import { CinemasModule } from './cinemas/cinemas.module';
-import { RoomsModule } from './rooms/rooms.module';
-import { SeatsModule } from './seats/seats.module';
-import { ScreeningsModule } from './screenings/screenings.module';
-import { TicketsModule } from './tickets/tickets.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { MoviesModule } from './resources/movies/movies.module'
+import { CategoriesModule } from './resources/categories/categories.module'
+import { CinemasModule } from './resources/cinemas/cinemas.module'
+import { RoomsModule } from './resources/rooms/rooms.module'
+import { SeatsModule } from './resources/seats/seats.module'
+import { ScreeningsModule } from './resources/screenings/screenings.module'
+import { TicketsModule } from './resources/tickets/tickets.module'
+import { AuthModule } from './auth/auth.module'
+import { UsersModule } from './resources/users/users.module'
+import { APP_GUARD } from '@nestjs/core'
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard'
+import { RolesGuard } from './resources/common/guards/roles.guard'
 
 @Module({
-  imports: [MoviesModule, CategoriesModule, CinemasModule, RoomsModule, SeatsModule, ScreeningsModule, TicketsModule, AuthModule, UsersModule],
+  imports: [
+    MoviesModule,
+    CategoriesModule,
+    CinemasModule,
+    RoomsModule,
+    SeatsModule,
+    ScreeningsModule,
+    TicketsModule,
+    AuthModule,
+    UsersModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}
