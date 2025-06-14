@@ -3,7 +3,7 @@ import { UsersService } from 'src/resources/users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { LoginUserDto } from './dto/login-user.dto'
-import { DEFAULT_USER_ROLE, JWT_SECRET, SALT_ROUNDS } from 'src/settings'
+import { JWT_SECRET, SALT_ROUNDS } from 'src/settings'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { User } from '@prisma/client'
 
@@ -56,7 +56,7 @@ export class AuthService {
 
     const user = await this.usersService.create({
       ...registerUserDto,
-      role: DEFAULT_USER_ROLE,
+      role: 'USER',
       password: hashedPassword,
     })
 

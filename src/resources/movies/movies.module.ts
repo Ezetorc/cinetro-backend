@@ -4,6 +4,7 @@ import { MoviesController } from './movies.controller'
 import { PrismaService } from 'src/resources/common/services/prisma.service'
 import { MovieCategoriesService } from 'src/resources/movie-categories/movie-categories.service'
 import { CategoriesService } from 'src/resources/categories/categories.service'
+import { CacheService } from '../common/services/cache.service'
 
 @Module({
   controllers: [MoviesController],
@@ -12,6 +13,7 @@ import { CategoriesService } from 'src/resources/categories/categories.service'
     PrismaService,
     MovieCategoriesService,
     CategoriesService,
+    CacheService,
   ],
 })
 export class MoviesModule {}

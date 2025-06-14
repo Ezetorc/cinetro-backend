@@ -1,29 +1,19 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { PORT, SWAGGER_CONFIG } from './settings'
+import { PORT } from './settings'
 import { ValidationPipe } from '@nestjs/common'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ResponseInterceptor } from './common/interceptors/response.interceptor'
-import { SwaggerModule } from '@nestjs/swagger'
-import { disableHeader } from './common/utilities/disable-header.utility'
-import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
+import { App } from './common/helpers/app.helper'
 
-NestFactory.create(AppModule).then(app => {
-  const swaggerDocument = SwaggerModule.createDocument(app, SWAGGER_CONFIG)
-  const theme = new SwaggerTheme()
-  const options = {
-    explorer: true,
-    customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
-  }
+NestFactory.create(AppModule).then(nestApp => {
+  const app = new App(nestApp)
 
-  SwaggerModule.setup('docs', app, swaggerDocument, options)
-
-  disableHeader(app, 'x-powered-by')
-
-  app
-    .useGlobalInterceptors(new ResponseInterceptor())
-    .useGlobalFilters(new HttpExceptionFilter())
-    .useGlobalPipes(new ValidationPipe({ whitelist: true }))
-    .useGlobalInterceptors()
-    .listen(PORT)
+  app.setupSwagger()
+  app.disableHeader('x-powered-by')
+  app.nest.useGlobalInterceptors(new ResponseInterceptor())
+  app.nest.useGlobalFilters(new HttpExceptionFilter())
+  app.nest.useGlobalPipes(new ValidationPipe({ whitelist: true }))
+  app.nest.useGlobalInterceptors()
+  app.nest.listen(PORT)
 })

@@ -7,7 +7,9 @@ import { MovieCategoriesService } from 'src/resources/movie-categories/movie-cat
 import { CategoriesService } from 'src/resources/categories/categories.service'
 import { PaginationArgs } from 'src/resources/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
-import { Movie } from '@prisma/client'
+import { MovieWithCategories } from './entities/movie-with-categories'
+import { CacheService } from '../common/services/cache.service'
+import { CacheKeys } from '../common/constants/cache-keys.constant'
 
 @Injectable()
 export class MoviesService {
@@ -15,6 +17,7 @@ export class MoviesService {
     private readonly prismaService: PrismaService,
     private readonly movieCategoriesService: MovieCategoriesService,
     private readonly categoriesService: CategoriesService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create (data: CreateMovieDto) {
@@ -29,26 +32,63 @@ export class MoviesService {
   }
 
   async getAllForPreview (paginationArgs?: PaginationArgs) {
-    return await this.prismaService.paginate<Movie>({
-      model: 'movie',
-      paginationArgs,
-      options: {
-        select: {
-          title: true,
-          id: true,
-          thumbnail: true,
-        },
-      },
+    return await this.cacheService.cached({
+      key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationArgs),
+      ttl: '1h',
+      fn: () =>
+        this.prismaService.paginate<MoviePreview>({
+          model: 'movie',
+          paginationArgs,
+          options: {
+            select: {
+              title: true,
+              id: true,
+              thumbnail: true,
+            },
+          },
+        }),
     })
   }
 
   async getAll (paginationArgs?: PaginationArgs) {
-    const { data, nextCursor } =
-      await this.prismaService.paginate<MoviePreview>({
-        model: 'movie',
-        paginationArgs,
-        options: {
-          orderBy: { releaseDate: 'asc' },
+    return await this.cacheService.cached({
+      key: CacheKeys.PAGINATED_MOVIES(paginationArgs),
+      ttl: '1h',
+      fn: async () => {
+        const { data, nextCursor } =
+          await this.prismaService.paginate<MovieWithCategories>({
+            model: 'movie',
+            paginationArgs,
+            options: {
+              orderBy: { releaseDate: 'asc' },
+              include: {
+                categories: {
+                  include: {
+                    category: true,
+                  },
+                },
+              },
+            },
+          })
+
+        return {
+          data: data.map(movie => ({
+            ...movie,
+            categories: movie.categories.map(c => c.category.name),
+          })),
+          nextCursor,
+        }
+      },
+    })
+  }
+
+  async getById (id: number) {
+    return await this.cacheService.cached({
+      key: CacheKeys.MOVIE(id),
+      ttl: '5m',
+      fn: async () => {
+        const movie = await this.prismaService.movie.findUnique({
+          where: { id },
           include: {
             categories: {
               include: {
@@ -56,38 +96,18 @@ export class MoviesService {
               },
             },
           },
-        },
-      })
+        })
 
-    return {
-      data: data.map(movie => ({
-        ...movie,
-        categories: movie.categories.map(category => category.category.name),
-      })),
-      nextCursor,
-    }
-  }
-
-  async getById (id: number) {
-    const movie = await this.prismaService.movie.findUnique({
-      where: { id },
-      include: {
-        categories: {
-          include: {
-            category: true,
-          },
-        },
+        if (movie) {
+          return {
+            ...movie,
+            categories: movie.categories.map(mc => mc.category.name),
+          }
+        } else {
+          return null
+        }
       },
     })
-
-    if (movie) {
-      return {
-        ...movie,
-        categories: movie.categories.map(mc => mc.category.name),
-      }
-    } else {
-      return null
-    }
   }
 
   async update (id: number, data: UpdateMovieDto) {
