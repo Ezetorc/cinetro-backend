@@ -5,24 +5,24 @@ import {
   UnauthorizedException,
   Get,
   Req,
-  HttpStatus,
+  HttpStatus
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { LoginUserDto } from './dto/login-user.dto'
-import { UsersService } from 'src/resources/users/users.service'
+import { UsersService } from 'src/users/users.service'
 import { AuthenticatedRequest } from 'src/common/interfaces/authenticated-request.interface'
-import { Public } from 'src/resources/common/decorators/public.decorator'
 import { RegisterUserDto } from './dto/register-user.dto'
-import { SanitizedUser } from 'src/resources/users/entities/sanitized-user.entity'
-import { Roles } from 'src/resources/common/decorators/roles.decorator'
-import { Description } from 'src/resources/common/decorators/description.decorator'
+import { SanitizedUser } from 'src/users/entities/sanitized-user.entity'
 import { ApiBody } from '@nestjs/swagger'
+import { Public } from 'src/common/decorators/public.decorator'
+import { Description } from 'src/common/decorators/description.decorator'
+import { Roles } from 'src/common/decorators/roles.decorator'
 
 @Controller('auth')
 export class AuthController {
   constructor (
     private readonly authService: AuthService,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
   @Post('login')

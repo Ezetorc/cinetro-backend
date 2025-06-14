@@ -1,8 +1,8 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { SWAGGER_CONFIG } from 'src/settings'
 
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
+import { SWAGGER_CONFIG } from '../constants/swagger.constant'
 export class App {
   private app: INestApplication
   private swaggerConfig = new DocumentBuilder()
@@ -15,7 +15,7 @@ export class App {
       bearerFormat: 'JWT',
       in: 'header',
       name: 'Authorization',
-      description: 'Enter your bearer token',
+      description: 'Enter your bearer token'
     })
     .addSecurityRequirements('bearer')
     .build()
@@ -27,12 +27,12 @@ export class App {
   setupSwagger (): App {
     const swaggerDocument = SwaggerModule.createDocument(
       this.app,
-      this.swaggerConfig,
+      this.swaggerConfig
     )
     const theme = new SwaggerTheme()
     const options = {
       explorer: true,
-      customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK),
+      customCss: theme.getBuffer(SwaggerThemeNameEnum.DARK)
     }
 
     SwaggerModule.setup('docs', this.app, swaggerDocument, options)

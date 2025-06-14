@@ -1,31 +1,32 @@
 import { ConflictException, Injectable } from '@nestjs/common'
-import { UsersService } from 'src/resources/users/users.service'
+import { UsersService } from 'src/users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { LoginUserDto } from './dto/login-user.dto'
-import { JWT_SECRET, SALT_ROUNDS } from 'src/settings'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { User } from '@prisma/client'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
   constructor (
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
   ) {}
 
   sign (user: User): string {
     return this.jwtService.sign(
       {
         id: user.id,
-        role: user.role,
+        role: user.role
       },
-      { secret: JWT_SECRET },
+      { secret: this.configService.getOrThrow('jwt.secret') }
     )
   }
 
   async hash (str: string): Promise<string> {
-    return await bcrypt.hash(str, SALT_ROUNDS)
+    return await bcrypt.hash(str, this.configService.getOrThrow('saltRounds'))
   }
 
   async login (loginDto: LoginUserDto) {
@@ -35,7 +36,7 @@ export class AuthService {
 
     const passwordMatches = await bcrypt.compare(
       loginDto.password,
-      user.password,
+      user.password
     )
 
     if (!passwordMatches) return null
@@ -47,7 +48,7 @@ export class AuthService {
 
   async register (registerUserDto: RegisterUserDto) {
     const userAlreadyExists = await this.usersService.exists(
-      registerUserDto.email,
+      registerUserDto.email
     )
 
     if (userAlreadyExists) throw new ConflictException('Email already in use')
@@ -57,7 +58,7 @@ export class AuthService {
     const user = await this.usersService.create({
       ...registerUserDto,
       role: 'USER',
-      password: hashedPassword,
+      password: hashedPassword
     })
 
     const token = this.sign(user)
