@@ -5,10 +5,15 @@ import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { PrismaService } from '../common/services/prisma.service'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { Screening } from '@prisma/client'
+import { CacheService } from 'src/common/services/cache.service'
+import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
 
 @Injectable()
 export class ScreeningsService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor (
+    private readonly prismaService: PrismaService,
+    private readonly cacheService: CacheService
+  ) {}
 
   async create (data: CreateScreeningDto) {
     try {
@@ -19,14 +24,23 @@ export class ScreeningsService {
   }
 
   async getAll (paginationArgs: PaginationArgs) {
-    return await this.prismaService.paginate<Screening>({
-      model: 'screening',
-      paginationArgs,
+    return await this.cacheService.cached({
+      key: CACHE_KEYS.PAGINATED_SCREENINGS(paginationArgs),
+      ttl: '1h',
+      fn: () =>
+        this.prismaService.paginate<Screening>({
+          model: 'screening',
+          paginationArgs
+        })
     })
   }
 
   async getById (id: number) {
-    return await this.prismaService.screening.findUnique({ where: { id } })
+    return await this.cacheService.cached({
+      key: CACHE_KEYS.SCREENING(id),
+      ttl: '1h',
+      fn: () => this.prismaService.screening.findUnique({ where: { id } })
+    })
   }
 
   async update (id: number, data: UpdateScreeningDto) {

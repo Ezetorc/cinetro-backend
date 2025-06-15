@@ -9,7 +9,7 @@ import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
 import { MovieWithCategories } from './entities/movie-with-categories'
 import { CacheService } from '../common/services/cache.service'
-import { CACHE_KEYS } from 'src/common/constants/cache.constant'
+import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
 
 @Injectable()
 export class MoviesService {

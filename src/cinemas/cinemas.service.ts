@@ -5,24 +5,38 @@ import { PrismaService } from 'src/common/services/prisma.service'
 import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { Cinema } from '@prisma/client'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { CacheService } from 'src/common/services/cache.service'
+import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
 
 @Injectable()
 export class CinemasService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor (
+    private readonly prismaService: PrismaService,
+    private readonly cacheService: CacheService
+  ) {}
 
   async create (data: CreateCinemaDto) {
     return await this.prismaService.cinema.create({ data })
   }
 
   async getAll (paginationArgs: PaginationArgs) {
-    return await this.prismaService.paginate<Cinema>({
-      model: 'cinema',
-      paginationArgs: paginationArgs,
+    return await this.cacheService.cached({
+      key: CACHE_KEYS.PAGINATED_CINEMAS(paginationArgs),
+      ttl: '1d',
+      fn: () =>
+        this.prismaService.paginate<Cinema>({
+          model: 'cinema',
+          paginationArgs: paginationArgs
+        })
     })
   }
 
   async getById (id: number) {
-    return await this.prismaService.cinema.findUnique({ where: { id } })
+    return await this.cacheService.cached({
+      key: CACHE_KEYS.CINEMA(id),
+      ttl: '1d',
+      fn: () => this.prismaService.cinema.findUnique({ where: { id } })
+    })
   }
 
   async update (id: number, data: UpdateCinemaDto) {

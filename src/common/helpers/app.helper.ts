@@ -1,23 +1,16 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
-import { SWAGGER_CONFIG } from '../constants/swagger.constant'
+import { SWAGGER_CONFIG } from '../constants/swagger-config.constant'
+
 export class App {
   private app: INestApplication
   private swaggerConfig = new DocumentBuilder()
     .setTitle(SWAGGER_CONFIG.title)
     .setDescription(SWAGGER_CONFIG.description)
     .setVersion(SWAGGER_CONFIG.version)
-    .addBearerAuth({
-      type: 'http',
-      scheme: 'bearer',
-      bearerFormat: 'JWT',
-      in: 'header',
-      name: 'Authorization',
-      description: 'Enter your bearer token'
-    })
-    .addSecurityRequirements('bearer')
+    .addBearerAuth(SWAGGER_CONFIG.bearerAuth)
+    .addSecurityRequirements(SWAGGER_CONFIG.securityRequirements)
     .build()
 
   constructor (app: INestApplication) {

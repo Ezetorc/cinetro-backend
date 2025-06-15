@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
 import { Role } from '@prisma/client'
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
-import { DEFAULT_REQUIRED_ROLES } from '../constants/roles.constant'
+import { DEFAULT_REQUIRED_ROLES } from '../constants/default-required-roles.constant'
 import { ROLES_KEY } from '../decorators/roles.decorator'
 
 @Injectable()

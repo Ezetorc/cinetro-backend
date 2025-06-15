@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config'
 
 NestFactory.create(AppModule).then(nestApp => {
   const app = new App(nestApp)
-  const configService = nestApp.get(ConfigService)
+  const configService = app.nest.get(ConfigService)
   const port = configService.getOrThrow<number>('port')
 
   app.setupSwagger()
