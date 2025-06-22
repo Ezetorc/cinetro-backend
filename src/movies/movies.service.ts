@@ -9,7 +9,7 @@ import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
 import { MovieWithCategories } from './entities/movie-with-categories'
 import { CacheService } from '../common/services/cache.service'
-import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
+import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class MoviesService {
@@ -17,23 +17,28 @@ export class MoviesService {
     private readonly prismaService: PrismaService,
     private readonly movieCategoriesService: MovieCategoriesService,
     private readonly categoriesService: CategoriesService,
-    private readonly cacheService: CacheService,
+    private readonly cacheService: CacheService
   ) {}
 
   async create (data: CreateMovieDto) {
-    const { categoriesIds, ...rest } = data
-    const newMovie = await this.prismaService.movie.create({ data: rest })
-    const updatedMovie = await this.movieCategoriesService.addCategoriesToMovie(
-      newMovie,
-      categoriesIds,
-    )
+    try {
+      const { categoriesIds, ...rest } = data
+      const newMovie = await this.prismaService.movie.create({ data: rest })
+      const updatedMovie =
+        await this.movieCategoriesService.addCategoriesToMovie(
+          newMovie,
+          categoriesIds
+        )
 
-    return updatedMovie
+      return updatedMovie
+    } catch (error) {
+      ErrorHandler.handle(error)
+    }
   }
 
   async getAllForPreview (paginationArgs?: PaginationArgs) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.PAGINATED_MOVIES_PREVIEW(paginationArgs),
+      key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationArgs),
       ttl: '1h',
       fn: () =>
         this.prismaService.paginate<MoviePreview>({
@@ -43,16 +48,16 @@ export class MoviesService {
             select: {
               title: true,
               id: true,
-              thumbnail: true,
-            },
-          },
-        }),
+              thumbnail: true
+            }
+          }
+        })
     })
   }
 
   async getAll (paginationArgs?: PaginationArgs) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.PAGINATED_MOVIES(paginationArgs),
+      key: CacheKeys.PAGINATED_MOVIES(paginationArgs),
       ttl: '1h',
       fn: async () => {
         const { data, nextCursor } =
@@ -64,27 +69,27 @@ export class MoviesService {
               include: {
                 categories: {
                   include: {
-                    category: true,
-                  },
-                },
-              },
-            },
+                    category: true
+                  }
+                }
+              }
+            }
           })
 
         return {
           data: data.map(movie => ({
             ...movie,
-            categories: movie.categories.map(c => c.category.name),
+            categories: movie.categories.map(c => c.category.name)
           })),
-          nextCursor,
+          nextCursor
         }
-      },
+      }
     })
   }
 
   async getById (id: number) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.MOVIE(id),
+      key: CacheKeys.MOVIE(id),
       ttl: '5m',
       fn: async () => {
         const movie = await this.prismaService.movie.findUnique({
@@ -92,21 +97,21 @@ export class MoviesService {
           include: {
             categories: {
               include: {
-                category: true,
-              },
-            },
-          },
+                category: true
+              }
+            }
+          }
         })
 
         if (movie) {
           return {
             ...movie,
-            categories: movie.categories.map(mc => mc.category.name),
+            categories: movie.categories.map(mc => mc.category.name)
           }
         } else {
           return null
         }
-      },
+      }
     })
   }
 
@@ -116,7 +121,7 @@ export class MoviesService {
     try {
       const updatedMovie = await this.prismaService.movie.update({
         where: { id },
-        data: rest,
+        data: rest
       })
 
       if (categoriesIds) {
@@ -124,7 +129,7 @@ export class MoviesService {
         await this.movieCategoriesService.create(id, categoriesIds)
 
         const categoriesNames = await this.categoriesService.getNamesByIds(
-          categoriesIds,
+          categoriesIds
         )
 
         updatedMovie['categories'] = categoriesNames

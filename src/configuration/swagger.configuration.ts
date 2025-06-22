@@ -1,4 +1,4 @@
-import { SwaggerConfig } from '../types/swagger-config.type'
+import { SwaggerConfig } from 'src/common/types/swagger-config.type'
 
 export const SWAGGER_CONFIG: SwaggerConfig = {
   title: 'Cinemax',

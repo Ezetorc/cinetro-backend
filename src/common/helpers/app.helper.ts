@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { SWAGGER_CONFIG } from 'src/configuration/swagger.configuration'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
-import { SWAGGER_CONFIG } from '../constants/swagger-config.constant'
 
 export class App {
   private app: INestApplication

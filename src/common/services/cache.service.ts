@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import { Cache } from 'cache-manager'
-import ms, { StringValue } from 'ms'
+import * as ms from 'ms'
+import { StringValue } from 'ms'
 
 @Injectable()
 export class CacheService {

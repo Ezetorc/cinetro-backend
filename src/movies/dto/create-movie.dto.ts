@@ -49,7 +49,7 @@ export class CreateMovieDto {
   classification: Classification
 
   @ApiProperty({
-    description: 'Description of the movie',
+    description: 'ApiDescription of the movie',
     example:
       'A brave young llama named Lalo embarks on a thrilling journey across the Andes to save his village from an ancient curse.',
   })

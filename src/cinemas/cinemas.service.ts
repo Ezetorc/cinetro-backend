@@ -6,7 +6,7 @@ import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { Cinema } from '@prisma/client'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { CacheService } from 'src/common/services/cache.service'
-import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
+import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class CinemasService {
@@ -21,7 +21,7 @@ export class CinemasService {
 
   async getAll (paginationArgs: PaginationArgs) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.PAGINATED_CINEMAS(paginationArgs),
+      key: CacheKeys.PAGINATED_CINEMAS(paginationArgs),
       ttl: '1d',
       fn: () =>
         this.prismaService.paginate<Cinema>({
@@ -33,7 +33,7 @@ export class CinemasService {
 
   async getById (id: number) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.CINEMA(id),
+      key: CacheKeys.CINEMA(id),
       ttl: '1d',
       fn: () => this.prismaService.cinema.findUnique({ where: { id } })
     })

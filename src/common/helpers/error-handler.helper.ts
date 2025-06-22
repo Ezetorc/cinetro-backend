@@ -3,8 +3,6 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export class ErrorHandler {
   static handle (error: any): void {
-    console.log('Debug: ', error.message)
-
     if (!(error instanceof PrismaClientKnownRequestError)) {
       throw new NotFoundException('Unexpected error')
     }
@@ -21,7 +19,7 @@ export class ErrorHandler {
 
         const message = constraintFields?.length
           ? `Error because other entities are related with this ${constraintFields.join(
-              ', ',
+              ', '
             )}, or the constraints don't exist`
           : `Error because other entities are related with this entity or they don't exist`
 

@@ -11,18 +11,19 @@ import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard'
-import { RolesGuard } from './common/guards/roles.guard'
 import { CacheModule } from '@nestjs/cache-manager'
 import { redisStore } from 'cache-manager-redis-yet'
-import configuration from './configuration/configuration'
-import { validationSchema } from './configuration/validation'
+import { envConfiguration } from './configuration/env.configuration'
+import { envValidation } from './configuration/env.validation'
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+import { UserRolesModule } from './user-roles/user-roles.module'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema,
-      load: [configuration]
+      validationSchema: envValidation,
+      load: [envConfiguration]
     }),
     CacheModule.registerAsync({
       isGlobal: true,
@@ -45,7 +46,12 @@ import { validationSchema } from './configuration/validation'
     ScreeningsModule,
     TicketsModule,
     AuthModule,
-    UsersModule
+    UsersModule,
+    ThrottlerModule.forRoot({
+      throttlers: [{ limit: 4, ttl: seconds(10) }],
+      errorMessage: 'Too many requests'
+    }),
+    UserRolesModule
   ],
   providers: [
     {
@@ -54,7 +60,7 @@ import { validationSchema } from './configuration/validation'
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: ThrottlerGuard
     }
   ]
 })

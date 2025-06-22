@@ -1,4 +1,5 @@
-import { Role, User } from '@prisma/client'
+import { RoleName } from 'src/common/enums/role-name.enum'
+import { UserWithRoles } from './user-with-roles.entity'
 
 export class SanitizedUser {
   id: number
@@ -8,16 +9,16 @@ export class SanitizedUser {
   genre: string
   preferredCinemaId?: number
   createdAt: Date
-  role: Role
+  roles: RoleName[]
 
-  constructor (user: User) {
-    this.id = user.id
-    this.name = user.name
-    this.surname = user.surname
-    this.birthDate = user.birthDate
-    this.genre = user.genre
-    this.preferredCinemaId = user.preferredCinemaId ?? undefined
-    this.createdAt = user.createdAt
-    this.role = user.role
+  constructor (user: UserWithRoles) {
+    Object.assign(this, {
+      ...user,
+      preferredCinemaId: user.preferredCinemaId ?? undefined
+    })
+  }
+
+  static getMany (users: UserWithRoles[]): SanitizedUser[] {
+    return users.map(user => new SanitizedUser(user))
   }
 }

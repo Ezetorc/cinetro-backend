@@ -5,63 +5,70 @@ import {
   Body,
   Patch,
   Delete,
-  UseGuards,
-  HttpStatus,
+  HttpStatus
 } from '@nestjs/common'
 import { TicketsService } from './tickets.service'
 import { CreateTicketDto } from './dto/create-ticket.dto'
 import { UpdateTicketDto } from './dto/update-ticket.dto'
-import { UserOwnsResourceGuard } from '../common/guards/user-owns-resource.guard'
 import { Id } from '../common/decorators/id.decorator'
-import { Description } from '../common/decorators/description.decorator'
-import { IdParam } from '../common/decorators/id-param.decorator'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { ApiDescription } from '../common/decorators/api-description.decorator'
+import { ApiId } from '../common/decorators/api-id.decorator'
+import { UsePolicy } from 'src/common/decorators/use-policy.decorator'
 
 @Controller('tickets')
 export class TicketsController {
   constructor (private readonly ticketsService: TicketsService) {}
 
   @Post()
-  @Description('Returns the ticket created', HttpStatus.CREATED)
+  // @OnlyEmployees()
+  @UsePolicy('create', 'ticket')
+  @ApiDescription('Returns the ticket created', HttpStatus.CREATED)
   create (@Body() createDto: CreateTicketDto) {
     return this.ticketsService.create(createDto)
   }
 
   @Get('user/:userId')
-  @Roles('USER')
-  @UseGuards(UserOwnsResourceGuard)
-  @Description('Unauthorized', HttpStatus.UNAUTHORIZED)
-  @Description('Returns an array of user tickets', HttpStatus.OK)
+  // @OnlyRoles(RoleName.USER)
+  // @UseGuards(UserOwnsResourceGuard)
+  @UsePolicy('read', 'tickets:own')
+  @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
+  @ApiDescription('Returns an array of user tickets', HttpStatus.OK)
   getOfUser (@Id('ofUser') userId: number) {
     return this.ticketsService.getOfUser(userId)
   }
 
   @Get()
-  @Description('Returns an array of tickets')
+  @ApiDescription('Returns an array of tickets')
+  // @OnlyEmployees()
+  @UsePolicy('read', 'tickets:all')
   getAll () {
+    // Agregar filtrado por cinemaId
     return this.ticketsService.getAll()
   }
 
   @Get(':id')
-  @IdParam('Id of the ticket')
-  @Description('Ticket not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the ticket with the given id', HttpStatus.OK)
+  @ApiId('Id of the ticket')
+  @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the ticket with the given id', HttpStatus.OK)
+  // @OnlyEmployees()
   getById (@Id() id: number) {
     return this.ticketsService.getById(id)
   }
 
   @Patch(':id')
-  @IdParam('Id of the ticket')
-  @Description('Ticket not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the updated ticket', HttpStatus.OK)
+  @ApiId('Id of the ticket')
+  @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the updated ticket', HttpStatus.OK)
+  // @OnlyEmployees()
   update (@Id() id: number, @Body() updateDto: UpdateTicketDto) {
     return this.ticketsService.update(id, updateDto)
   }
 
   @Delete(':id')
-  @IdParam('Id of the ticket')
-  @Description('Ticket not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the deleted ticket', HttpStatus.OK)
+  @ApiId('Id of the ticket')
+  @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the deleted ticket', HttpStatus.OK)
+  // @OnlyEmployees()
   delete (@Id() id: number) {
     return this.ticketsService.delete(id)
   }

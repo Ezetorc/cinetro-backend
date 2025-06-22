@@ -5,52 +5,79 @@ import {
   Body,
   Patch,
   Delete,
-  HttpStatus,
+  HttpStatus
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { Id } from '../common/decorators/id.decorator'
-import { Description } from '../common/decorators/description.decorator'
-import { IdParam } from '../common/decorators/id-param.decorator'
+import { ApiDescription } from '../common/decorators/api-description.decorator'
+import { ApiId } from '../common/decorators/api-id.decorator'
+import { SanitizedUser } from './entities/sanitized-user.entity'
 
 @Controller('users')
 export class UsersController {
   constructor (private readonly usersService: UsersService) {}
 
   @Post()
-  @Description('Returns the user created', HttpStatus.CREATED)
-  create (@Body() createDto: CreateUserDto) {
-    return this.usersService.create(createDto)
+  @ApiDescription('Returns the user created', HttpStatus.CREATED)
+  async create (@Body() createDto: CreateUserDto) {
+    const user = await this.usersService.create(createDto, 'withRoles')
+
+    if (user) {
+      return new SanitizedUser(user)
+    } else {
+      return null
+    }
   }
 
   @Get()
-  @Description('Returns an array of users')
-  getAll () {
-    return this.usersService.getAll()
+  @ApiDescription('Returns an array of users')
+  async getAll () {
+    const users = await this.usersService.getAll('withRoles')
+
+    return SanitizedUser.getMany(users)
   }
 
   @Get(':id')
-  @IdParam('Id of the user')
-  @Description('User not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the user with the given id', HttpStatus.OK)
-  getById (@Id() id: number) {
-    return this.usersService.getById(id)
+  @ApiId('Id of the user')
+  @ApiDescription('User not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the user with the given id', HttpStatus.OK)
+  async getById (@Id() id: number) {
+    const user = await this.usersService.getById(id, 'withRoles')
+
+    if (user) {
+      return new SanitizedUser(user)
+    } else {
+      return null
+    }
   }
 
   @Patch(':id')
-  @IdParam('Id of the user')
-  @Description('User not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the updated user', HttpStatus.OK)
-  update (@Id() id: number, @Body() updateDto: UpdateUserDto) {
-    return this.usersService.update(id, updateDto)
+  @ApiId('Id of the user')
+  @ApiDescription('User not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the updated user', HttpStatus.OK)
+  async update (@Id() id: number, @Body() updateDto: UpdateUserDto) {
+    const user = await this.usersService.update(id, updateDto, 'withRoles')
+
+    if (user) {
+      return new SanitizedUser(user)
+    } else {
+      return null
+    }
   }
 
   @Delete(':id')
-  @IdParam('Id of the user')
-  @Description('User not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the deleted user', HttpStatus.OK)
-  delete (@Id() id: number) {
-    return this.usersService.delete(id)
+  @ApiId('Id of the user')
+  @ApiDescription('User not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the deleted user', HttpStatus.OK)
+  async delete (@Id() id: number) {
+    const user = await this.usersService.delete(id, 'withRoles')
+
+    if (user) {
+      return new SanitizedUser(user)
+    } else {
+      return null
+    }
   }
 }

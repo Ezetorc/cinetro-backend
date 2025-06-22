@@ -13,7 +13,7 @@ import { CacheService } from '../common/services/cache.service'
     PrismaService,
     MovieCategoriesService,
     CategoriesService,
-    CacheService,
-  ],
+    CacheService
+  ]
 })
 export class MoviesModule {}

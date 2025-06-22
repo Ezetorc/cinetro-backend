@@ -1,8 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
-import { Observable } from 'rxjs'
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator'
+import { Key } from '../enums/keys.enum'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -10,18 +9,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super()
   }
 
-  canActivate (
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+  async canActivate (context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(Key.IS_PUBLIC, [
       context.getHandler(),
-      context.getClass(),
+      context.getClass()
     ])
 
     if (isPublic) {
       return true
     }
 
-    return super.canActivate(context)
+    return super.canActivate(context) as Promise<boolean>
   }
 }

@@ -18,7 +18,7 @@ model Movie {
   distributor    String
   releaseDate    DateTime       @map("release_date")
 
-  categories Movie_Category[]
+  categories MovieCategory[]
   screenings Screening[]
 
   @@map("movies")
@@ -28,12 +28,12 @@ model Category {
   id   Int    @id @default(autoincrement())
   name String @unique
 
-  movies Movie_Category[]
+  movies MovieCategory[]
 
   @@map("categories")
 }
 
-model Movie_Category {
+model MovieCategory {
   movieId    Int @map("movie_id")
   categoryId Int @map("category_id")
 
@@ -45,13 +45,14 @@ model Movie_Category {
 }
 
 model Cinema {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
   location  String
-  latitude  Decimal? @db.Decimal(10, 8)
-  longitude Decimal? @db.Decimal(11, 8)
+  latitude  Decimal?   @db.Decimal(10, 8)
+  longitude Decimal?   @db.Decimal(11, 8)
   rooms     Room[]
   User      User[]
+  UserRole  UserRole[]
 
   @@map("cinemas")
 }
@@ -122,20 +123,34 @@ model User {
   preferredCinemaId Int?     @map("preferred_cinema_id")
   genre             Genre
   createdAt         DateTime @default(now()) @map("created_at")
-  role              Role
 
-  preferredCinema Cinema?  @relation(fields: [preferredCinemaId], references: [id])
+  preferredCinema Cinema?    @relation(fields: [preferredCinemaId], references: [id])
   tickets         Ticket[]
+  userRoles        UserRole[]
 
   @@map("users")
 }
 
-enum Role {
-  USER
-  ADMIN
-  MANAGER
-  CASHIER
-  SUPPORT
+model Role {
+  id    Int        @id @default(autoincrement())
+  name  String     @unique
+  
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId   Int
+  roleId   Int
+  cinemaId Int?
+
+  user   User    @relation(fields: [userId], references: [id])
+  role   Role    @relation(fields: [roleId], references: [id])
+  cinema Cinema? @relation(fields: [cinemaId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_roles")
 }
 
 enum Genre {

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Genre, Role } from '@prisma/client'
+import { Genre } from '@prisma/client'
 import {
   IsDateString,
   IsEmail,
@@ -7,14 +7,15 @@ import {
   IsNumber,
   IsOptional,
   IsPhoneNumber,
-  IsString,
+  IsString
 } from 'class-validator'
+import { RoleName } from 'src/common/enums/role-name.enum'
 
 export class CreateUserDto {
   @ApiProperty({
     description: 'Your name',
     type: 'string',
-    example: 'Jhon',
+    example: 'Jhon'
   })
   @IsString()
   name: string
@@ -22,7 +23,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your surname',
     type: 'string',
-    example: 'Doe',
+    example: 'Doe'
   })
   @IsString()
   surname: string
@@ -30,7 +31,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your password',
     type: 'string',
-    example: 'myPassword123!',
+    example: 'myPassword123!'
   })
   @IsString()
   password: string
@@ -38,7 +39,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your email',
     type: 'string',
-    example: 'jhon.doe@mail.com',
+    example: 'jhon.doe@mail.com'
   })
   @IsEmail()
   email: string
@@ -46,7 +47,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your birth date in ISO format',
     type: 'string',
-    example: '1985-08-26T00:00:00.000Z',
+    example: '1985-08-26T00:00:00.000Z'
   })
   @IsDateString()
   birthDate: string
@@ -54,7 +55,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your phone number',
     type: 'string',
-    example: '+5491123456789',
+    example: '+5491123456789'
   })
   @IsPhoneNumber()
   phoneNumber: string
@@ -62,7 +63,7 @@ export class CreateUserDto {
   @ApiPropertyOptional({
     description: 'Id of your preferred cinema',
     example: 2,
-    type: 'number',
+    type: 'number'
   })
   @IsOptional()
   @IsNumber()
@@ -71,16 +72,16 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Your genre',
     example: 'FEMALE',
-    enum: Genre,
+    enum: Genre
   })
   @IsEnum(Genre)
   genre: Genre
 
   @ApiProperty({
     description: 'Your role',
-    enum: Role,
-    example: 'USER',
+    enum: RoleName,
+    example: 'USER'
   })
-  @IsEnum(Role)
-  role: Role
+  @IsEnum(RoleName)
+  role: RoleName
 }

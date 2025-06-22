@@ -10,13 +10,12 @@ import {
 import { AuthService } from './auth.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { UsersService } from 'src/users/users.service'
-import { AuthenticatedRequest } from 'src/common/interfaces/authenticated-request.interface'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { SanitizedUser } from 'src/users/entities/sanitized-user.entity'
 import { ApiBody } from '@nestjs/swagger'
 import { Public } from 'src/common/decorators/public.decorator'
-import { Description } from 'src/common/decorators/description.decorator'
-import { Roles } from 'src/common/decorators/roles.decorator'
+import { ApiDescription } from 'src/common/decorators/api-description.decorator'
+import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type'
 
 @Controller('auth')
 export class AuthController {
@@ -26,8 +25,8 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @Description('Returns JWT Token', HttpStatus.OK)
-  @Description('Invalid credentials', HttpStatus.BAD_REQUEST)
+  @ApiDescription('Returns JWT Token', HttpStatus.OK)
+  @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @ApiBody({ type: LoginUserDto })
   @Public()
   async login (@Body() loginDto: LoginUserDto) {
@@ -43,33 +42,31 @@ export class AuthController {
   }
 
   @Post('register')
-  @Description('Returns JWT Token', HttpStatus.CREATED)
-  @Description('Invalid credentials', HttpStatus.BAD_REQUEST)
+  @ApiDescription('Returns JWT Token', HttpStatus.CREATED)
+  @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @Public()
   async register (@Body() registerDto: RegisterUserDto) {
     const userData = await this.authService.register(registerDto)
 
     if (userData) {
-      const sanitizedUser = new SanitizedUser(userData.user)
-
-      return { ...userData, user: sanitizedUser }
+      return new SanitizedUser(userData.user)
     } else {
       throw new UnauthorizedException('Invalid credentials')
     }
   }
 
   @Get()
-  @Description('Returns user data', HttpStatus.OK)
-  @Description('Unauthorized', HttpStatus.UNAUTHORIZED)
-  @Roles('USER', 'CASHIER', 'MANAGER', 'SUPPORT')
+  @ApiDescription('Returns user data', HttpStatus.OK)
+  @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
+  // @OnlyRoles(RoleName.USER, RoleName.CASHIER, RoleName.MANAGER)
   async getSelf (@Req() request: AuthenticatedRequest) {
     const userId = request.user.id
-    const user = await this.usersService.getById(userId)
+    const user = await this.usersService.getById(userId, 'withRoles')
 
-    if (!user) return null
-
-    const sanitizedUser = new SanitizedUser(user)
-
-    return sanitizedUser
+    if (user) {
+      return new SanitizedUser(user)
+    } else {
+      return null
+    }
   }
 }

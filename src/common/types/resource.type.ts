@@ -1,0 +1,10 @@
+export type Resource =
+  | 'ticket'
+  | 'tickets:own'
+  | 'tickets:of-his-cinema'
+  | 'tickets:all'
+  | 'movie'
+  | 'movies:own'
+  | 'movies:of-his-cinema'
+  | 'movies:all'
+  | 'all'

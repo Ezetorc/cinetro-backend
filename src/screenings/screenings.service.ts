@@ -6,7 +6,7 @@ import { PrismaService } from '../common/services/prisma.service'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { Screening } from '@prisma/client'
 import { CacheService } from 'src/common/services/cache.service'
-import { CACHE_KEYS } from 'src/common/constants/cache-keys.constant'
+import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class ScreeningsService {
@@ -25,7 +25,7 @@ export class ScreeningsService {
 
   async getAll (paginationArgs: PaginationArgs) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.PAGINATED_SCREENINGS(paginationArgs),
+      key: CacheKeys.PAGINATED_SCREENINGS(paginationArgs),
       ttl: '1h',
       fn: () =>
         this.prismaService.paginate<Screening>({
@@ -37,7 +37,7 @@ export class ScreeningsService {
 
   async getById (id: number) {
     return await this.cacheService.cached({
-      key: CACHE_KEYS.SCREENING(id),
+      key: CacheKeys.SCREENING(id),
       ttl: '1h',
       fn: () => this.prismaService.screening.findUnique({ where: { id } })
     })

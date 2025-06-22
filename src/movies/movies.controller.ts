@@ -8,41 +8,44 @@ import {
   Query,
   ParseBoolPipe,
   DefaultValuePipe,
-  HttpStatus,
+  HttpStatus
 } from '@nestjs/common'
 import { MoviesService } from './movies.service'
 import { CreateMovieDto } from './dto/create-movie.dto'
 import { UpdateMovieDto } from './dto/update-movie.dto'
 import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
-import { Description } from '../common/decorators/description.decorator'
-import { WithPagination } from '../common/decorators/with-pagination.decorator'
-import { BooleanOptionalQuery } from '../common/decorators/boolean-optional-query.decorator'
-import { IdParam } from '../common/decorators/id-param.decorator'
+import { ApiDescription } from '../common/decorators/api-description.decorator'
+import { ApiPagination } from '../common/decorators/with-pagination.decorator'
+import { ApiId } from '../common/decorators/api-id.decorator'
 import { Id } from '../common/decorators/id.decorator'
 import { Public } from 'src/common/decorators/public.decorator'
+import { ApiQuery } from '@nestjs/swagger'
 
 @Controller('movies')
 export class MoviesController {
   constructor (private readonly moviesService: MoviesService) {}
 
   @Post()
-  @Description('Returns the movie created', HttpStatus.CREATED)
+  @ApiDescription('Returns the movie created', HttpStatus.CREATED)
+  // @OnlyEmployees(RoleName.ADMIN, RoleName.MANAGER)
   create (@Body() createDto: CreateMovieDto) {
     return this.moviesService.create(createDto)
   }
 
   @Get()
-  @BooleanOptionalQuery(
-    'forPreview',
-    'If true, returns only preview data of movies',
-  )
-  @Description('Returns an array of movies')
-  @WithPagination()
+  @ApiQuery({
+    name: 'forPreview',
+    required: false,
+    type: Boolean,
+    description: 'If true, returns only preview data of movies'
+  })
+  @ApiDescription('Returns an array of movies')
+  @ApiPagination()
   @Public()
   getAll (
     @Query('forPreview', new DefaultValuePipe(false), ParseBoolPipe)
     forPreview: boolean,
-    @Query() pagination: PaginationArgs,
+    @Query() pagination: PaginationArgs
   ) {
     if (forPreview) {
       return this.moviesService.getAllForPreview(pagination)
@@ -52,26 +55,28 @@ export class MoviesController {
   }
 
   @Get(':id')
-  @IdParam('Id of the movie to get')
-  @Description('Movie not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the movie with the id given', HttpStatus.OK)
+  @ApiId('Id of the movie to get')
+  @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the movie with the id given', HttpStatus.OK)
   @Public()
   getById (@Id() id: number) {
     return this.moviesService.getById(id)
   }
 
   @Patch(':id')
-  @IdParam('Id of the movie to update')
-  @Description('Movie not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the movie updated', HttpStatus.OK)
+  @ApiId('Id of the movie to update')
+  @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the movie updated', HttpStatus.OK)
+  // @OnlyEmployees()
   update (@Id() id: number, @Body() updateDto: UpdateMovieDto) {
     return this.moviesService.update(id, updateDto)
   }
 
   @Delete(':id')
-  @IdParam('Id of the movie to delete')
-  @Description('Movie not found', HttpStatus.NOT_FOUND)
-  @Description('Returns the movie deleted', HttpStatus.OK)
+  @ApiId('Id of the movie to delete')
+  @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
+  @ApiDescription('Returns the movie deleted', HttpStatus.OK)
+  // @OnlyEmployees()
   delete (@Id() id: number) {
     return this.moviesService.delete(id)
   }
