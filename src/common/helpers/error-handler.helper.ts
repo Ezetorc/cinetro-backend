@@ -2,7 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export class ErrorHandler {
-  static handle (error: any): void {
+  static handle(error: any): void {
     if (!(error instanceof PrismaClientKnownRequestError)) {
       throw new NotFoundException('Unexpected error')
     }
@@ -12,7 +12,7 @@ export class ErrorHandler {
     throw new NotFoundException('Unexpected error')
   }
 
-  private static handlePrismaError (error: PrismaClientKnownRequestError) {
+  private static handlePrismaError(error: PrismaClientKnownRequestError) {
     switch (error.code) {
       case 'P2003': {
         const constraintFields = error.meta?.constraint as string[] | undefined

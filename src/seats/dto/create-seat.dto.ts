@@ -5,7 +5,7 @@ export class CreateSeatDto {
   @ApiProperty({
     description: 'Id of the room',
     type: 'number',
-    example: 1,
+    example: 1
   })
   @IsInt()
   roomId: number
@@ -13,7 +13,7 @@ export class CreateSeatDto {
   @ApiProperty({
     description: 'Name of the row',
     type: 'string',
-    example: 'A',
+    example: 'A'
   })
   @IsString()
   @Length(1, 1)
@@ -22,7 +22,7 @@ export class CreateSeatDto {
   @ApiProperty({
     description: 'Number of the seat in the row',
     type: 'number',
-    example: 12,
+    example: 12
   })
   @IsInt()
   @IsPositive()

@@ -1,4 +1,29 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateUserRoleDto } from './create-user-role.dto';
+import { ApiProperty } from '@nestjs/swagger'
+import { IsInt } from 'class-validator'
+import { RoleName } from 'src/common/enums/role-name.enum'
 
-export class UpdateUserRoleDto extends PartialType(CreateUserRoleDto) {}
+export class UpdateUserRoleDto {
+  @ApiProperty({
+    description: 'Id of the user',
+    type: 'number',
+    example: 1
+  })
+  @IsInt()
+  userId: number
+
+  @ApiProperty({
+    description: 'Name of the role',
+    enum: RoleName,
+    example: RoleName.MANAGER
+  })
+  @IsInt()
+  roleName: RoleName
+
+  @ApiProperty({
+    description: 'Id of the cinema',
+    type: 'number',
+    example: 1
+  })
+  @IsInt()
+  cinemaId?: number | null
+}

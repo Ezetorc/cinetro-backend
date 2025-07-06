@@ -11,14 +11,14 @@ export class SanitizedUser {
   createdAt: Date
   roles: RoleName[]
 
-  constructor (user: UserWithRoles) {
+  constructor(user: UserWithRoles) {
     Object.assign(this, {
       ...user,
       preferredCinemaId: user.preferredCinemaId ?? undefined
     })
   }
 
-  static getMany (users: UserWithRoles[]): SanitizedUser[] {
-    return users.map(user => new SanitizedUser(user))
+  static getMany(users: UserWithRoles[]): SanitizedUser[] {
+    return users.map((user) => new SanitizedUser(user))
   }
 }

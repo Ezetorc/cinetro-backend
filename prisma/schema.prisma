@@ -126,15 +126,14 @@ model User {
 
   preferredCinema Cinema?    @relation(fields: [preferredCinemaId], references: [id])
   tickets         Ticket[]
-  userRoles        UserRole[]
+  userRoles       UserRole[]
 
   @@map("users")
 }
 
 model Role {
-  id    Int        @id @default(autoincrement())
-  name  String     @unique
-  
+  name String @id
+
   users UserRole[]
 
   @@map("roles")
@@ -142,14 +141,14 @@ model Role {
 
 model UserRole {
   userId   Int
-  roleId   Int
+  roleName String
   cinemaId Int?
 
   user   User    @relation(fields: [userId], references: [id])
-  role   Role    @relation(fields: [roleId], references: [id])
+  role   Role    @relation(fields: [roleName], references: [name])
   cinema Cinema? @relation(fields: [cinemaId], references: [id])
 
-  @@id([userId, roleId])
+  @@id([userId, roleName])
   @@map("user_roles")
 }
 

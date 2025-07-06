@@ -11,7 +11,7 @@ export class MovieEntity implements Movie {
   distributor: string
   releaseDate: Date
 
-  constructor (movie: Movie) {
+  constructor(movie: Movie) {
     Object.assign(this, movie)
   }
 }

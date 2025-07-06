@@ -8,9 +8,9 @@ import { Seat } from '@prisma/client'
 
 @Injectable()
 export class SeatsService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async create (data: CreateSeatDto) {
+  async create(data: CreateSeatDto) {
     try {
       return await this.prismaService.seat.create({ data })
     } catch (error) {
@@ -18,18 +18,18 @@ export class SeatsService {
     }
   }
 
-  async getAll (paginationArgs: PaginationArgs) {
+  async getAll(paginationArgs: PaginationArgs) {
     return await this.prismaService.paginate<Seat>({
       model: 'seat',
-      paginationArgs,
+      paginationArgs
     })
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.prismaService.seat.findUnique({ where: { id } })
   }
 
-  async update (id: number, data: UpdateSeatDto) {
+  async update(id: number, data: UpdateSeatDto) {
     try {
       return await this.prismaService.seat.update({ where: { id }, data })
     } catch (error) {
@@ -37,7 +37,7 @@ export class SeatsService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.seat.delete({ where: { id } })
     } catch (error) {

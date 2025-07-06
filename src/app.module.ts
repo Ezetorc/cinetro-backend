@@ -10,13 +10,14 @@ import { TicketsModule } from './tickets/tickets.module'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { APP_GUARD } from '@nestjs/core'
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard'
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { CacheModule } from '@nestjs/cache-manager'
 import { redisStore } from 'cache-manager-redis-yet'
 import { envConfiguration } from './configuration/env.configuration'
 import { envValidation } from './configuration/env.validation'
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { UserRolesModule } from './user-roles/user-roles.module'
+import { PolicyModule } from './policy/policy.module'
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { UserRolesModule } from './user-roles/user-roles.module'
       throttlers: [{ limit: 4, ttl: seconds(10) }],
       errorMessage: 'Too many requests'
     }),
-    UserRolesModule
+    UserRolesModule,
+    PolicyModule
   ],
   providers: [
     {

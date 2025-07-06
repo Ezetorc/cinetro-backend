@@ -13,22 +13,21 @@ import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class MoviesService {
-  constructor (
+  constructor(
     private readonly prismaService: PrismaService,
     private readonly movieCategoriesService: MovieCategoriesService,
     private readonly categoriesService: CategoriesService,
     private readonly cacheService: CacheService
   ) {}
 
-  async create (data: CreateMovieDto) {
+  async create(data: CreateMovieDto) {
     try {
       const { categoriesIds, ...rest } = data
       const newMovie = await this.prismaService.movie.create({ data: rest })
-      const updatedMovie =
-        await this.movieCategoriesService.addCategoriesToMovie(
-          newMovie,
-          categoriesIds
-        )
+      const updatedMovie = await this.movieCategoriesService.addCategoriesToMovie(
+        newMovie,
+        categoriesIds
+      )
 
       return updatedMovie
     } catch (error) {
@@ -36,7 +35,7 @@ export class MoviesService {
     }
   }
 
-  async getAllForPreview (paginationArgs?: PaginationArgs) {
+  async getAllForPreview(paginationArgs?: PaginationArgs) {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationArgs),
       ttl: '1h',
@@ -55,31 +54,30 @@ export class MoviesService {
     })
   }
 
-  async getAll (paginationArgs?: PaginationArgs) {
+  async getAll(paginationArgs?: PaginationArgs) {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_MOVIES(paginationArgs),
       ttl: '1h',
       fn: async () => {
-        const { data, nextCursor } =
-          await this.prismaService.paginate<MovieWithCategories>({
-            model: 'movie',
-            paginationArgs,
-            options: {
-              orderBy: { releaseDate: 'asc' },
-              include: {
-                categories: {
-                  include: {
-                    category: true
-                  }
+        const { data, nextCursor } = await this.prismaService.paginate<MovieWithCategories>({
+          model: 'movie',
+          paginationArgs,
+          options: {
+            orderBy: { releaseDate: 'asc' },
+            include: {
+              categories: {
+                include: {
+                  category: true
                 }
               }
             }
-          })
+          }
+        })
 
         return {
-          data: data.map(movie => ({
+          data: data.map((movie) => ({
             ...movie,
-            categories: movie.categories.map(c => c.category.name)
+            categories: movie.categories.map((c) => c.category.name)
           })),
           nextCursor
         }
@@ -87,7 +85,7 @@ export class MoviesService {
     })
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.cacheService.cached({
       key: CacheKeys.MOVIE(id),
       ttl: '5m',
@@ -106,7 +104,7 @@ export class MoviesService {
         if (movie) {
           return {
             ...movie,
-            categories: movie.categories.map(mc => mc.category.name)
+            categories: movie.categories.map((mc) => mc.category.name)
           }
         } else {
           return null
@@ -115,7 +113,7 @@ export class MoviesService {
     })
   }
 
-  async update (id: number, data: UpdateMovieDto) {
+  async update(id: number, data: UpdateMovieDto) {
     const { categoriesIds, ...rest } = data
 
     try {
@@ -128,9 +126,7 @@ export class MoviesService {
         await this.movieCategoriesService.delete(id)
         await this.movieCategoriesService.create(id, categoriesIds)
 
-        const categoriesNames = await this.categoriesService.getNamesByIds(
-          categoriesIds
-        )
+        const categoriesNames = await this.categoriesService.getNamesByIds(categoriesIds)
 
         updatedMovie['categories'] = categoriesNames
       }
@@ -141,7 +137,7 @@ export class MoviesService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.movie.delete({ where: { id } })
     } catch (error) {

@@ -10,16 +10,16 @@ import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class CinemasService {
-  constructor (
+  constructor(
     private readonly prismaService: PrismaService,
     private readonly cacheService: CacheService
   ) {}
 
-  async create (data: CreateCinemaDto) {
+  async create(data: CreateCinemaDto) {
     return await this.prismaService.cinema.create({ data })
   }
 
-  async getAll (paginationArgs: PaginationArgs) {
+  async getAll(paginationArgs: PaginationArgs) {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_CINEMAS(paginationArgs),
       ttl: '1d',
@@ -31,7 +31,7 @@ export class CinemasService {
     })
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.cacheService.cached({
       key: CacheKeys.CINEMA(id),
       ttl: '1d',
@@ -39,7 +39,7 @@ export class CinemasService {
     })
   }
 
-  async update (id: number, data: UpdateCinemaDto) {
+  async update(id: number, data: UpdateCinemaDto) {
     try {
       return await this.prismaService.cinema.update({ where: { id }, data })
     } catch (error) {
@@ -47,7 +47,7 @@ export class CinemasService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.cinema.delete({ where: { id } })
     } catch (error) {

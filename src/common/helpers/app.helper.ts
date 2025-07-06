@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { Application } from 'express'
 import { SWAGGER_CONFIG } from 'src/configuration/swagger.configuration'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
@@ -13,15 +14,12 @@ export class App {
     .addSecurityRequirements(SWAGGER_CONFIG.securityRequirements)
     .build()
 
-  constructor (app: INestApplication) {
+  constructor(app: INestApplication) {
     this.app = app
   }
 
-  setupSwagger (): App {
-    const swaggerDocument = SwaggerModule.createDocument(
-      this.app,
-      this.swaggerConfig
-    )
+  setupSwagger(): App {
+    const swaggerDocument = SwaggerModule.createDocument(this.app, this.swaggerConfig)
     const theme = new SwaggerTheme()
     const options = {
       explorer: true,
@@ -33,15 +31,15 @@ export class App {
     return this
   }
 
-  disableHeader (header: string): App {
-    const expressApp = this.app.getHttpAdapter().getInstance()
+  disableHeader(header: string): App {
+    const expressApp = this.app.getHttpAdapter().getInstance() as Application
 
     expressApp.disable(header)
 
     return this
   }
 
-  get nest (): INestApplication {
+  get nest(): INestApplication {
     return this.app
   }
 }

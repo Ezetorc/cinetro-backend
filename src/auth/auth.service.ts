@@ -18,7 +18,7 @@ import { JWTUser } from 'src/users/entities/jwt-user.entity'
 
 @Injectable()
 export class AuthService {
-  constructor (
+  constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -26,25 +26,22 @@ export class AuthService {
     private readonly userRolesService: UserRolesService
   ) {}
 
-  sign (user: UserWithRoles): string {
-    return this.jwtService.sign(new JWTUser(user), {
+  sign(user: UserWithRoles): string {
+    return this.jwtService.sign(new JWTUser(user).toPlain(), {
       secret: this.configService.getOrThrow('jwt.secret')
     })
   }
 
-  async hash (str: string): Promise<string> {
+  async hash(str: string): Promise<string> {
     return await bcrypt.hash(str, this.configService.getOrThrow('saltRounds'))
   }
 
-  async login (loginDto: LoginUserDto) {
+  async login(loginDto: LoginUserDto) {
     const user = await this.usersService.getByEmail(loginDto.email, 'withRoles')
 
     if (!user) return null
 
-    const passwordMatches = await bcrypt.compare(
-      loginDto.password,
-      user.password
-    )
+    const passwordMatches = await bcrypt.compare(loginDto.password, user.password)
 
     if (!passwordMatches) return null
 
@@ -53,7 +50,7 @@ export class AuthService {
     return { token, user }
   }
 
-  async register (data: RegisterUserDto) {
+  async register(data: RegisterUserDto) {
     const userAlreadyExists = await this.usersService.exists(data.email)
 
     if (userAlreadyExists) throw new ConflictException('Email already in use')
@@ -73,7 +70,7 @@ export class AuthService {
     for (const role of user.roles) {
       await this.userRolesService.create({
         cinemaId: role.cinemaId,
-        roleId: role.id,
+        roleName: role.name,
         userId: user.id
       })
     }

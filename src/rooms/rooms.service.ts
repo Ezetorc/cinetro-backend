@@ -8,9 +8,9 @@ import { Room } from '@prisma/client'
 
 @Injectable()
 export class RoomsService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async create (data: CreateRoomDto) {
+  async create(data: CreateRoomDto) {
     try {
       return await this.prismaService.room.create({ data })
     } catch (error) {
@@ -18,18 +18,18 @@ export class RoomsService {
     }
   }
 
-  async getAll (paginationArgs: PaginationArgs) {
+  async getAll(paginationArgs: PaginationArgs) {
     return await this.prismaService.paginate<Room>({
       model: 'room',
-      paginationArgs,
+      paginationArgs
     })
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.prismaService.room.findUnique({ where: { id } })
   }
 
-  async update (id: number, data: UpdateRoomDto) {
+  async update(id: number, data: UpdateRoomDto) {
     try {
       return await this.prismaService.room.update({ where: { id }, data })
     } catch (error) {
@@ -37,7 +37,7 @@ export class RoomsService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.room.delete({ where: { id } })
     } catch (error) {

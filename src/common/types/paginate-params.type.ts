@@ -7,9 +7,7 @@ export type PaginateParams<K extends keyof ModelMap> = {
   paginationArgs?: PaginationArgs
   options?: Omit<
     Parameters<
-      PrismaClient[K] extends { findMany(args: any): any }
-        ? PrismaClient[K]['findMany']
-        : never
+      PrismaClient[K] extends { findMany(args: any): any } ? PrismaClient[K]['findMany'] : never
     >[0],
     'take' | 'skip' | 'cursor'
   >

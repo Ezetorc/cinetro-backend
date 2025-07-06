@@ -6,7 +6,7 @@ import { App } from './common/helpers/app.helper'
 import { AppModule } from './app.module'
 import { ConfigService } from '@nestjs/config'
 
-NestFactory.create(AppModule).then(nestApp => {
+NestFactory.create(AppModule).then((nestApp) => {
   const app = new App(nestApp)
   const configService = app.nest.get(ConfigService)
   const port = configService.getOrThrow<number>('port')

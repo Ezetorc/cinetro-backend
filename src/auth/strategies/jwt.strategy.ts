@@ -7,7 +7,7 @@ import { UsersService } from 'src/users/users.service'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor (
+  constructor(
     readonly configService: ConfigService,
     private readonly usersService: UsersService
   ) {
@@ -18,11 +18,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate (payload: any) {
-    const user = await this.usersService.getById(payload.sub, 'withRoles')
+  async validate(payload: any) {
+    if (typeof payload !== 'object' || payload === null || !('id' in payload)) {
+      return null
+    }
 
-    if (!user) return null
+    const { id } = payload as { id: unknown }
 
-    return new JWTUser(user)
+    const userId = typeof id === 'string' ? parseInt(id, 10) : typeof id === 'number' ? id : null
+
+    if (userId === null || Number.isNaN(userId)) return null
+
+    try {
+      const user = await this.usersService.getById(userId, 'withRoles')
+
+      if (!user) return null
+
+      return new JWTUser(user)
+    } catch {
+      return null
+    }
   }
 }

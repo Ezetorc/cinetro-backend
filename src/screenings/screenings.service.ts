@@ -10,12 +10,12 @@ import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class ScreeningsService {
-  constructor (
+  constructor(
     private readonly prismaService: PrismaService,
     private readonly cacheService: CacheService
   ) {}
 
-  async create (data: CreateScreeningDto) {
+  async create(data: CreateScreeningDto) {
     try {
       return await this.prismaService.screening.create({ data })
     } catch (error) {
@@ -23,7 +23,7 @@ export class ScreeningsService {
     }
   }
 
-  async getAll (paginationArgs: PaginationArgs) {
+  async getAll(paginationArgs: PaginationArgs) {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_SCREENINGS(paginationArgs),
       ttl: '1h',
@@ -35,7 +35,7 @@ export class ScreeningsService {
     })
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.cacheService.cached({
       key: CacheKeys.SCREENING(id),
       ttl: '1h',
@@ -43,7 +43,7 @@ export class ScreeningsService {
     })
   }
 
-  async update (id: number, data: UpdateScreeningDto) {
+  async update(id: number, data: UpdateScreeningDto) {
     try {
       return await this.prismaService.screening.update({ where: { id }, data })
     } catch (error) {
@@ -51,7 +51,7 @@ export class ScreeningsService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.screening.delete({ where: { id } })
     } catch (error) {

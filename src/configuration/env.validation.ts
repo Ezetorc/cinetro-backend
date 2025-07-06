@@ -9,4 +9,3 @@ export const envValidation = Joi.object({
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().default(6379)
 })
-

@@ -1,6 +1,7 @@
 export enum RoleName {
-  'USER' = 'user',
   'ADMIN' = 'admin',
+  'OPERATOR' = 'operator',
   'MANAGER' = 'manager',
-  'CASHIER' = 'cashier'
+  'CASHIER' = 'cashier',
+  'USER' = 'user'
 }

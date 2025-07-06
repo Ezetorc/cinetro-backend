@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
-async function main () {
+async function main() {
   await prisma.ticket.deleteMany()
   await prisma.screening.deleteMany()
   await prisma.seat.deleteMany()
@@ -118,6 +118,12 @@ async function main () {
     }
   })
 
+  const operatorRole = await prisma.role.create({
+    data: {
+      name: 'operator'
+    }
+  })
+
   // Asientos
   const seatA1 = await prisma.seat.create({
     data: { roomId: room1.id, row: 'A', number: 1 }
@@ -173,18 +179,38 @@ async function main () {
     }
   })
 
+  const user3 = await prisma.user.create({
+    data: {
+      name: 'operator',
+      surname: 'operator',
+      email: 'operator@gmail.com',
+      password: hashedPassword,
+      birthDate: new Date('1985-05-10'),
+      phoneNumber: '0987654321',
+      genre: 'MALE',
+      preferredCinemaId: cinema2.id
+    }
+  })
+
   // UserRoles
   await prisma.userRole.create({
     data: {
       userId: user1.id,
-      roleId: adminRole.id
+      roleName: adminRole.name
     }
   })
 
   await prisma.userRole.create({
     data: {
       userId: user2.id,
-      roleId: cashierRole.id
+      roleName: cashierRole.name
+    }
+  })
+
+  await prisma.userRole.create({
+    data: {
+      userId: user3.id,
+      roleName: operatorRole.name
     }
   })
 
@@ -211,10 +237,10 @@ async function main () {
 }
 
 main()
-  .catch(e => {
+  .catch((e) => {
     console.error('❌ Error en seed:', e)
     process.exit(1)
   })
-  .finally(async () => {
-    await prisma.$disconnect()
+  .finally(() => {
+    prisma.$disconnect()
   })

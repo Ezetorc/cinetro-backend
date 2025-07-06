@@ -1,12 +1,4 @@
-import {
-  Post,
-  Body,
-  Controller,
-  UnauthorizedException,
-  Get,
-  Req,
-  HttpStatus
-} from '@nestjs/common'
+import { Post, Body, Controller, UnauthorizedException, Get, Req, HttpStatus } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { UsersService } from 'src/users/users.service'
@@ -16,20 +8,22 @@ import { ApiBody } from '@nestjs/swagger'
 import { Public } from 'src/common/decorators/public.decorator'
 import { ApiDescription } from 'src/common/decorators/api-description.decorator'
 import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type'
+import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 
 @Controller('auth')
 export class AuthController {
-  constructor (
+  constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService
   ) {}
 
   @Post('login')
+  @UsePolicy('create', 'user:authorization')
   @ApiDescription('Returns JWT Token', HttpStatus.OK)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @ApiBody({ type: LoginUserDto })
   @Public()
-  async login (@Body() loginDto: LoginUserDto) {
+  async login(@Body() loginDto: LoginUserDto) {
     const userData = await this.authService.login(loginDto)
 
     if (userData) {
@@ -42,10 +36,11 @@ export class AuthController {
   }
 
   @Post('register')
+  @UsePolicy('create', 'user:own')
   @ApiDescription('Returns JWT Token', HttpStatus.CREATED)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @Public()
-  async register (@Body() registerDto: RegisterUserDto) {
+  async register(@Body() registerDto: RegisterUserDto) {
     const userData = await this.authService.register(registerDto)
 
     if (userData) {
@@ -56,10 +51,11 @@ export class AuthController {
   }
 
   @Get()
+  @UsePolicy('read', 'user:own')
   @ApiDescription('Returns user data', HttpStatus.OK)
   @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
   // @OnlyRoles(RoleName.USER, RoleName.CASHIER, RoleName.MANAGER)
-  async getSelf (@Req() request: AuthenticatedRequest) {
+  async getSelf(@Req() request: AuthenticatedRequest) {
     const userId = request.user.id
     const user = await this.usersService.getById(userId, 'withRoles')
 

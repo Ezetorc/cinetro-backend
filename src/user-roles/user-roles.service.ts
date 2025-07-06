@@ -4,16 +4,38 @@ import { PrismaService } from 'src/common/services/prisma.service'
 import { RoleName } from 'src/common/enums/role-name.enum'
 import { User } from '@prisma/client'
 import { Roles } from 'src/common/types/roles.type'
+import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
+import { UpdateUserRoleDto } from './dto/update-user-role.dto'
 
 @Injectable()
 export class UserRolesService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async create (data: CreateUserRoleDto) {
-    return await this.prismaService.userRole.create({ data })
+  async create(data: CreateUserRoleDto) {
+    try {
+      return await this.prismaService.userRole.create({ data })
+    } catch (error) {
+      ErrorHandler.handle(error)
+    }
   }
 
-  async getRolesOf (user: User): Promise<Roles> {
+  async update(data: UpdateUserRoleDto) {
+    try {
+      return await this.prismaService.userRole.update({
+        where: {
+          userId_roleName: {
+            userId: data.userId,
+            roleName: data.roleName
+          }
+        },
+        data
+      })
+    } catch (error) {
+      ErrorHandler.handle(error)
+    }
+  }
+
+  async getRolesOf(user: User): Promise<Roles> {
     const userRoles = await this.prismaService.userRole.findMany({
       where: { userId: user.id },
       include: {
@@ -25,10 +47,9 @@ export class UserRolesService {
       }
     })
 
-    return userRoles.map(userRole => ({
+    return userRoles.map((userRole) => ({
       name: userRole.role.name as RoleName,
-      cinemaId: userRole.cinemaId,
-      id: userRole.roleId
+      cinemaId: userRole.cinemaId
     }))
   }
 }

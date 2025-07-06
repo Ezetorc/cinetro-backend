@@ -1,6 +1,6 @@
 const ENV = process.env
 
-export function envConfiguration () {
+export function envConfiguration() {
   return {
     port: ENV.PORT ? parseInt(ENV.PORT, 10) : 3000,
     saltRounds: ENV.SALT_ROUNDS ? parseInt(ENV.SALT_ROUNDS) : 10,

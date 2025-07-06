@@ -4,7 +4,7 @@ import { IsInt, IsString } from 'class-validator'
 export class CreateRoomDto {
   @ApiProperty({
     description: 'ID of the cinema this room belongs to',
-    example: 1,
+    example: 1
   })
   @IsInt()
   cinemaId: number
@@ -15,7 +15,7 @@ export class CreateRoomDto {
 
   @ApiProperty({
     description: 'Number of seat columns in the room',
-    example: 15,
+    example: 15
   })
   @IsInt()
   seatColumns: number

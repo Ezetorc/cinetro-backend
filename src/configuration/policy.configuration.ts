@@ -1,32 +1,32 @@
-import { Movie, Ticket } from '@prisma/client'
-import { Policy } from 'src/common/helpers/policy.helper'
+import { Ticket, UserRole } from '@prisma/client'
+import { RoleName } from 'src/common/enums/role-name.enum'
+import { Policy } from 'src/policy/entities/policy.entity'
+import { TicketWithCinemaId } from 'src/tickets/entities/ticket-with-cinema-id.entity'
 
 export const policy = new Policy()
+const admin = policy.addRole(RoleName.ADMIN)
+const operator = policy.addRole(RoleName.OPERATOR)
+const manager = policy.addRole(RoleName.MANAGER)
+const cashier = policy.addRole(RoleName.CASHIER)
+const user = policy.addRole(RoleName.USER)
 
-policy.admin.canManage('all')
+admin.can('manage', 'all')
 
-policy.manager
-  .canCreate('tickets:of-his-cinema')
-  .if<Ticket>((user, ticket) => user.id === ticket.userId)
-  .canAlsoDelete('tickets:of-his-cinema')
-  .if<Ticket>((user, ticket) => user.id === ticket.userId)
-  .canAlsoCreate('movies:of-his-cinema')
-  .if<Movie>((user, movie) => user.id === movie.id)
-  .canAlsoUpdate('movies:of-his-cinema')
-  .if<Movie>((user, movie) => user.id === movie.id)
+operator
+  .extends(manager)
+  .canAlso('create', 'user-role')
+  .if<UserRole>((user, userRole) => userRole.userId === user.id)
 
-policy.cashier
-  .canRead('ticket')
-  .canAlsoUpdate('ticket')
-  .if<Ticket>((_user, ticket) => ticket.status === 'RESERVED')
-  .canAlsoCreate('ticket')
+cashier
+  .can('manage', 'ticket:of-cinema')
+  .if<TicketWithCinemaId>((user, resource) => user.worksInCinema(resource.cinemaId))
 
-policy.user
-  .canRead('movie')
-  .canAlsoCreate('ticket')
+user
+  .can('read', 'ticket:own')
   .if<Ticket>((user, ticket) => user.id === ticket.userId)
-  .canAlsoDelete('ticket')
-  .if<Ticket>((user, ticket) => user.id === ticket.userId)
-  .canAlsoUpdate('ticket')
-  .if<Ticket>((user, ticket) => user.id === ticket.userId)
+  .canAlso('read', 'screening:all')
+  .canAlso('read', 'user:own')
+  .canAlso('create', 'user:authorization')
+  .canAlso('create', 'user:own')
 
+policy.anyone.can('read', 'movie:all').canAlso('read', 'movie')

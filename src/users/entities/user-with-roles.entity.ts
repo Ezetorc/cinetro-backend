@@ -14,14 +14,14 @@ export class UserWithRoles implements User {
   createdAt: Date
   roles: Roles
 
-  constructor (user: User, roles: Roles) {
+  constructor(user: User, roles: Roles) {
     Object.assign(this, {
       ...user,
       roles
     })
   }
 
-  static getMany (users: User[], allRoles: Roles[]) {
+  static getMany(users: User[], allRoles: Roles[]) {
     return users.map((user, index) => new UserWithRoles(user, allRoles[index]))
   }
 }

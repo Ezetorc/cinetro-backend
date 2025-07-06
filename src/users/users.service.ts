@@ -10,19 +10,16 @@ import { UserRolesService } from 'src/user-roles/user-roles.service'
 
 @Injectable()
 export class UsersService {
-  constructor (
+  constructor(
     private readonly prismaService: PrismaService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     private readonly userRolesService: UserRolesService
   ) {}
 
-  async create(
-    data: CreateUserDto,
-    withRoles: 'withRoles'
-  ): Promise<UserWithRoles>
+  async create(data: CreateUserDto, withRoles: 'withRoles'): Promise<UserWithRoles>
   async create(data: CreateUserDto, withRoles?: undefined): Promise<User>
-  async create (
+  async create(
     data: CreateUserDto,
     withRoles?: 'withRoles'
   ): Promise<User | UserWithRoles | undefined> {
@@ -49,12 +46,12 @@ export class UsersService {
 
   async getAll(withRoles: 'withRoles'): Promise<UserWithRoles[]>
   async getAll(withRoles?: undefined): Promise<User[]>
-  async getAll (withRoles?: 'withRoles'): Promise<User[] | UserWithRoles[]> {
+  async getAll(withRoles?: 'withRoles'): Promise<User[] | UserWithRoles[]> {
     const users = await this.prismaService.user.findMany()
 
     if (withRoles === 'withRoles') {
       const allRoles = await Promise.all(
-        users.map(user => this.userRolesService.getRolesOf(user))
+        users.map((user) => this.userRolesService.getRolesOf(user))
       )
       return UserWithRoles.getMany(users, allRoles)
     } else {
@@ -62,15 +59,9 @@ export class UsersService {
     }
   }
 
-  async getById(
-    id: number,
-    withRoles: 'withRoles'
-  ): Promise<UserWithRoles | null>
+  async getById(id: number, withRoles: 'withRoles'): Promise<UserWithRoles | null>
   async getById(id: number, withRoles?: undefined): Promise<User | null>
-  async getById (
-    id: number,
-    withRoles?: 'withRoles'
-  ): Promise<User | UserWithRoles | null> {
+  async getById(id: number, withRoles?: 'withRoles'): Promise<User | UserWithRoles | null> {
     const user = await this.prismaService.user.findUnique({ where: { id } })
 
     if (!user) return null
@@ -83,15 +74,9 @@ export class UsersService {
     }
   }
 
-  async getByEmail(
-    email: string,
-    withRoles: 'withRoles'
-  ): Promise<UserWithRoles | null>
+  async getByEmail(email: string, withRoles: 'withRoles'): Promise<UserWithRoles | null>
   async getByEmail(email: string, withRoles?: undefined): Promise<User | null>
-  async getByEmail (
-    email: string,
-    withRoles?: 'withRoles'
-  ): Promise<User | UserWithRoles | null> {
+  async getByEmail(email: string, withRoles?: 'withRoles'): Promise<User | UserWithRoles | null> {
     const user = await this.prismaService.user.findUnique({ where: { email } })
 
     if (!user) return null
@@ -104,28 +89,23 @@ export class UsersService {
     }
   }
 
-  async exists (email: string): Promise<boolean> {
+  async exists(email: string): Promise<boolean> {
     const count = await this.prismaService.user.count({ where: { email } })
     return Boolean(count)
   }
 
+  async update(id: number, data: UpdateUserDto, withRoles: 'withRoles'): Promise<UserWithRoles>
+  async update(id: number, data: UpdateUserDto, withRoles?: undefined): Promise<User>
   async update(
-    id: number,
-    data: UpdateUserDto,
-    withRoles: 'withRoles'
-  ): Promise<UserWithRoles>
-  async update(
-    id: number,
-    data: UpdateUserDto,
-    withRoles?: undefined
-  ): Promise<User>
-  async update (
     id: number,
     data: UpdateUserDto,
     withRoles?: 'withRoles'
   ): Promise<User | UserWithRoles | undefined> {
     try {
-      const user = await this.prismaService.user.update({ where: { id }, data })
+      const user = await this.prismaService.user.update({
+        where: { id },
+        data
+      })
 
       if (withRoles === 'withRoles') {
         const roles = await this.userRolesService.getRolesOf(user)
@@ -140,10 +120,7 @@ export class UsersService {
 
   async delete(id: number, withRoles: 'withRoles'): Promise<UserWithRoles>
   async delete(id: number, withRoles?: undefined): Promise<User>
-  async delete (
-    id: number,
-    withRoles?: 'withRoles'
-  ): Promise<User | UserWithRoles | undefined> {
+  async delete(id: number, withRoles?: 'withRoles'): Promise<User | UserWithRoles | undefined> {
     try {
       const user = await this.prismaService.user.delete({ where: { id } })
 

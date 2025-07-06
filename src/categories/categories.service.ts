@@ -7,35 +7,35 @@ import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 
 @Injectable()
 export class CategoriesService {
-  constructor (private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async create (data: CreateCategoryDto) {
+  async create(data: CreateCategoryDto) {
     return this.prismaService.category.create({ data })
   }
 
-  async getAll () {
+  async getAll() {
     return await this.prismaService.category.findMany()
   }
 
-  async getById (id: number) {
+  async getById(id: number) {
     return await this.prismaService.category.findUnique({ where: { id } })
   }
 
-  async getNamesByIds (categoriesIds: number[]) {
+  async getNamesByIds(categoriesIds: number[]) {
     const categories = await Promise.all(
-      categoriesIds.map(categoryId =>
-        this.prismaService.category.findUnique({ where: { id: categoryId } }),
-      ),
+      categoriesIds.map((categoryId) =>
+        this.prismaService.category.findUnique({ where: { id: categoryId } })
+      )
     )
 
     const categoryNames = categories
       .filter((category): category is Category => Boolean(category))
-      .map(category => category?.name)
+      .map((category) => category?.name)
 
     return categoryNames
   }
 
-  async update (id: number, data: UpdateCategoryDto) {
+  async update(id: number, data: UpdateCategoryDto) {
     try {
       return await this.prismaService.category.update({ where: { id }, data })
     } catch (error) {
@@ -43,7 +43,7 @@ export class CategoriesService {
     }
   }
 
-  async delete (id: number) {
+  async delete(id: number) {
     try {
       return await this.prismaService.category.delete({ where: { id } })
     } catch (error) {
