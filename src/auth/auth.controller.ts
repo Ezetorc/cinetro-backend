@@ -5,7 +5,6 @@ import { UsersService } from 'src/users/users.service'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { SanitizedUser } from 'src/users/entities/sanitized-user.entity'
 import { ApiBody } from '@nestjs/swagger'
-import { Public } from 'src/common/decorators/public.decorator'
 import { ApiDescription } from 'src/common/decorators/api-description.decorator'
 import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
@@ -22,7 +21,6 @@ export class AuthController {
   @ApiDescription('Returns JWT Token', HttpStatus.OK)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @ApiBody({ type: LoginUserDto })
-  @Public()
   async login(@Body() loginDto: LoginUserDto) {
     const userData = await this.authService.login(loginDto)
 
@@ -39,7 +37,6 @@ export class AuthController {
   @UsePolicy('create', 'user:own')
   @ApiDescription('Returns JWT Token', HttpStatus.CREATED)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
-  @Public()
   async register(@Body() registerDto: RegisterUserDto) {
     const userData = await this.authService.register(registerDto)
 
@@ -54,7 +51,6 @@ export class AuthController {
   @UsePolicy('read', 'user:own')
   @ApiDescription('Returns user data', HttpStatus.OK)
   @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
-  // @OnlyRoles(RoleName.USER, RoleName.CASHIER, RoleName.MANAGER)
   async getSelf(@Req() request: AuthenticatedRequest) {
     const userId = request.user.id
     const user = await this.usersService.getById(userId, 'withRoles')

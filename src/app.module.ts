@@ -10,7 +10,6 @@ import { TicketsModule } from './tickets/tickets.module'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { APP_GUARD } from '@nestjs/core'
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
 import { CacheModule } from '@nestjs/cache-manager'
 import { redisStore } from 'cache-manager-redis-yet'
 import { envConfiguration } from './configuration/env.configuration'
@@ -18,6 +17,8 @@ import { envValidation } from './configuration/env.validation'
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { UserRolesModule } from './user-roles/user-roles.module'
 import { PolicyModule } from './policy/policy.module'
+import { PolicyGuard } from './policy/guards/policy.guard'
+import { JwtGuard } from './auth/guards/jwt.guard'
 
 @Module({
   imports: [
@@ -58,7 +59,11 @@ import { PolicyModule } from './policy/policy.module'
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard
+      useClass: JwtGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PolicyGuard
     },
     {
       provide: APP_GUARD,

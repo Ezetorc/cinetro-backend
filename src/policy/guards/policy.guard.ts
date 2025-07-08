@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, NotFoundException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { Key } from '../../common/enums/keys.enum'
+import { Key } from '../../common/enums/key.enum'
 import { PolicyService } from 'src/policy/policy.service'
 import { Resource } from 'src/policy/types/resource.type'
 import { Action } from 'src/policy/types/action.type'

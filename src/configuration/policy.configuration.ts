@@ -4,6 +4,7 @@ import { Policy } from 'src/policy/entities/policy.entity'
 import { TicketWithCinemaId } from 'src/tickets/entities/ticket-with-cinema-id.entity'
 
 export const policy = new Policy()
+const anyone = policy.anyone
 const admin = policy.addRole(RoleName.ADMIN)
 const operator = policy.addRole(RoleName.OPERATOR)
 const manager = policy.addRole(RoleName.MANAGER)
@@ -17,8 +18,11 @@ operator
   .canAlso('create', 'user-role')
   .if<UserRole>((user, userRole) => userRole.userId === user.id)
 
+manager.extends(cashier)
+
 cashier
-  .can('manage', 'ticket:of-cinema')
+  .extends(user)
+  .canAlso('manage', 'ticket:of-cinema')
   .if<TicketWithCinemaId>((user, resource) => user.worksInCinema(resource.cinemaId))
 
 user
@@ -29,4 +33,8 @@ user
   .canAlso('create', 'user:authorization')
   .canAlso('create', 'user:own')
 
-policy.anyone.can('read', 'movie:all').canAlso('read', 'movie')
+anyone
+  .can('read', 'movie:all')
+  .canAlso('read', 'movie')
+  .canAlso('create', 'user:authorization')
+  .canAlso('create', 'user:own')

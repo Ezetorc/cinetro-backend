@@ -7,7 +7,6 @@ import { ApiId } from '../common/decorators/api-id.decorator'
 import { Id } from '../common/decorators/id.decorator'
 import { ApiPagination } from '../common/decorators/with-pagination.decorator'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
-import { Public } from 'src/common/decorators/public.decorator'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 
 @Controller('cinemas')
@@ -25,7 +24,6 @@ export class CinemasController {
   @UsePolicy('read', 'cinema:all')
   @ApiDescription('Returns an array of cinemas')
   @ApiPagination()
-  @Public()
   getAll(@Query() pagination: PaginationArgs) {
     return this.cinemasService.getAll(pagination)
   }
@@ -35,7 +33,6 @@ export class CinemasController {
   @ApiId('Id of the cinema')
   @ApiDescription('Cinema not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the cinema with the id given', HttpStatus.OK)
-  @Public()
   getById(@Id() id: number) {
     return this.cinemasService.getById(id)
   }

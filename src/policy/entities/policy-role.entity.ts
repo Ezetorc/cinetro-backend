@@ -46,8 +46,8 @@ export class PolicyRole {
     }
   }
 
-  extends(policyRole: PolicyRole): Omit<PolicyRoleChain, 'if'> {
-    policyRole.rules.forEach((rule) => this._rules.push(rule))
+  extends(...policyRoles: PolicyRole[]): Omit<PolicyRoleChain, 'if'> {
+    policyRoles.forEach((policyRole) => policyRole.rules.forEach((rule) => this._rules.push(rule)))
 
     return this._getChain()
   }

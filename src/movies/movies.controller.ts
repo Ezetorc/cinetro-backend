@@ -18,7 +18,6 @@ import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiPagination } from '../common/decorators/with-pagination.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
 import { Id } from '../common/decorators/id.decorator'
-import { Public } from 'src/common/decorators/public.decorator'
 import { ApiQuery } from '@nestjs/swagger'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 
@@ -29,7 +28,6 @@ export class MoviesController {
   @Post()
   @UsePolicy('create', 'movie')
   @ApiDescription('Returns the movie created', HttpStatus.CREATED)
-  // @OnlyEmployees(RoleName.ADMIN, RoleName.MANAGER)
   create(@Body() createDto: CreateMovieDto) {
     return this.moviesService.create(createDto)
   }
@@ -44,7 +42,6 @@ export class MoviesController {
   })
   @ApiDescription('Returns an array of movies')
   @ApiPagination()
-  @Public()
   getAll(
     @Query('forPreview', new DefaultValuePipe(false), ParseBoolPipe)
     forPreview: boolean,
@@ -62,7 +59,6 @@ export class MoviesController {
   @ApiId('Id of the movie to get')
   @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the movie with the id given', HttpStatus.OK)
-  @Public()
   getById(@Id() id: number) {
     return this.moviesService.getById(id)
   }

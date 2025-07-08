@@ -18,19 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(payload: any) {
-    if (typeof payload !== 'object' || payload === null || !('id' in payload)) {
-      return null
-    }
-
-    const { id } = payload as { id: unknown }
-
-    const userId = typeof id === 'string' ? parseInt(id, 10) : typeof id === 'number' ? id : null
-
-    if (userId === null || Number.isNaN(userId)) return null
-
+  async validate(payload: { id: number }) {
     try {
-      const user = await this.usersService.getById(userId, 'withRoles')
+      const user = await this.usersService.getById(payload.id, 'withRoles')
 
       if (!user) return null
 
