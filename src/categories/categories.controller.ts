@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Delete, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Post, Body, Delete, HttpStatus, Query } from '@nestjs/common'
 import { CategoriesService } from './categories.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 import { Name } from 'src/common/decorators/name.decorator'
 import { ApiName } from 'src/common/decorators/api-name.decorator'
+import { ApiPagination } from 'src/common/decorators/api-pagination.decorator'
+import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
 
 @Controller('categories')
 export class CategoriesController {
@@ -20,8 +22,9 @@ export class CategoriesController {
   @Get()
   @UsePolicy('read', 'category:all')
   @ApiDescription('Returns an array of categories')
-  getAll() {
-    return this.categoriesService.getAll()
+  @ApiPagination()
+  getAll(@Query() pagination: PaginationArgs) {
+    return this.categoriesService.getAll(pagination)
   }
 
   @Get(':id')

@@ -7,4 +7,5 @@ export type ModelMap = {
   room: PrismaClient['room']
   screening: PrismaClient['screening']
   seat: PrismaClient['seat']
+  category: PrismaClient['category']
 }

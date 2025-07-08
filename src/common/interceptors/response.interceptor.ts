@@ -1,4 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common'
+import { Response } from 'express'
 import { Observable, map } from 'rxjs'
 
 @Injectable()
@@ -7,19 +8,17 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
     return next.handle().pipe(
       map((response) => {
         const isObject = response && typeof response === 'object'
-        const hasData = 'data' in response
-        const hasNextCursor = 'nextCursor' in response
+        const hasData = isObject && 'data' in response
+        const hasNextCursor = isObject && 'nextCursor' in response
 
-        if (isObject && hasData && hasNextCursor) {
+        if (hasData) {
           return {
             value: response.data,
-            nextCursor: response.nextCursor
-          }
-        } else {
-          return {
-            value: response
+            ...(hasNextCursor ? { nextCursor: response.nextCursor } : {})
           }
         }
+
+        return response as Response
       })
     )
   }

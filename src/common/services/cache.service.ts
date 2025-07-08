@@ -21,6 +21,7 @@ export class CacheService {
     }
 
     const data = await params.fn()
+
     await this.set(params.key, data, ttl)
 
     return data

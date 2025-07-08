@@ -36,4 +36,8 @@ export class CacheKeys {
   static SCREENING(id: number) {
     return this._getWithId('screening', id)
   }
+
+  static PAGINATED_CATEGORIES(paginationArgs?: PaginationArgs) {
+    return this._getWithPagination('categories', paginationArgs)
+  }
 }

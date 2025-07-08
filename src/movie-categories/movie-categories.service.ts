@@ -21,7 +21,7 @@ export class MovieCategoriesService {
 
   async addToMovie(movie: Movie, categoriesNames: string[]) {
     const movieCategories = await this.createMany(movie.id, categoriesNames)
-    const categories = movieCategories.map((movieCategory) => movieCategory.categoryName as string)
+    const categories = movieCategories.map((movieCategory) => movieCategory.categoryName)
 
     return { ...movie, categories }
   }

@@ -8,7 +8,8 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  ForbiddenException
+  ForbiddenException,
+  Req
 } from '@nestjs/common'
 import { TicketsService } from './tickets.service'
 import { CreateTicketDto } from './dto/create-ticket.dto'
@@ -17,10 +18,9 @@ import { Id } from '../common/decorators/id.decorator'
 import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
-import { JWTUser } from 'src/users/entities/jwt-user.entity'
-import { RequestUser } from 'src/common/decorators/request-user.decorator'
 import { ApiParam } from '@nestjs/swagger'
 import { isEmployee } from 'src/common/utilities/is-employee.utility'
+import { Request } from 'express'
 
 @Controller('tickets')
 export class TicketsController {
@@ -39,9 +39,9 @@ export class TicketsController {
   @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
   @ApiDescription('Returns an array of user tickets', HttpStatus.OK)
   @UsePolicy('read', 'ticket:own')
-  getOfSelf(@RequestUser() user: JWTUser | null) {
-    if (user) {
-      return this.ticketsService.getOfUser(user.id)
+  getOfSelf(@Req() request: Request) {
+    if (request.user) {
+      return this.ticketsService.getOfUser(request.user.id)
     } else {
       return null
     }
@@ -51,11 +51,8 @@ export class TicketsController {
   @ApiParam({ name: 'cinemaId', description: 'Id of the cinema' })
   @ApiDescription('Returns an array of tickets of an specific cinema')
   @UsePolicy('read', 'ticket:of-cinema')
-  getAllOfCinema(
-    @Param('cinemaId', ParseIntPipe) cinemaId: number,
-    @RequestUser() user: JWTUser | null
-  ) {
-    const userWorksInCinema = user?.roles.some(
+  getAllOfCinema(@Param('cinemaId', ParseIntPipe) cinemaId: number, @Req() request: Request) {
+    const userWorksInCinema = request.user?.roles.some(
       (role) => isEmployee(role.name) && role.cinemaId === cinemaId
     )
 
