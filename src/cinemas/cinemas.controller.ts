@@ -5,7 +5,7 @@ import { UpdateCinemaDto } from './dto/update-cinema.dto'
 import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
 import { Id } from '../common/decorators/id.decorator'
-import { ApiPagination } from '../common/decorators/with-pagination.decorator'
+import { ApiPagination } from '../common/decorators/api-pagination.decorator'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 

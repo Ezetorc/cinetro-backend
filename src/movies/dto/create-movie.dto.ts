@@ -1,4 +1,4 @@
-import { IsEnum, IsString, IsInt, IsOptional, IsDateString, IsNumber } from 'class-validator'
+import { IsEnum, IsString, IsInt, IsOptional, IsDateString } from 'class-validator'
 import { Classification } from '@prisma/client'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
@@ -64,9 +64,9 @@ export class CreateMovieDto {
   releaseDate: string
 
   @ApiPropertyOptional({
-    description: "IDs of the categories of the movies. See them in the 'categories' resource",
-    example: [1, 2]
+    description: "Names of the categories of the movies. See them in the 'categories' resource",
+    example: ['Adventure', 'Action']
   })
-  @IsNumber({}, { each: true })
-  categoriesIds?: number[]
+  @IsString({ each: true })
+  categories?: string[]
 }

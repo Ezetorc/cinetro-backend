@@ -34,7 +34,7 @@ async function main() {
       distributor: 'Universal',
       releaseDate: new Date('2024-05-01'),
       categories: {
-        create: [{ categoryId: action.id }, { categoryId: drama.id }]
+        create: [{ categoryName: action.name }, { categoryName: drama.name }]
       }
     }
   })
@@ -50,7 +50,7 @@ async function main() {
       distributor: 'Fox',
       releaseDate: new Date('2024-06-01'),
       categories: {
-        create: [{ categoryId: drama.id }]
+        create: [{ categoryName: drama.name }]
       }
     }
   })

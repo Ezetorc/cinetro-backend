@@ -2,20 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { CreateSeatDto } from './dto/create-seat.dto'
 import { UpdateSeatDto } from './dto/update-seat.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { Seat } from '@prisma/client'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class SeatsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(data: CreateSeatDto) {
-    try {
-      return await this.prismaService.seat.create({ data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.seat.create({ data }))
   }
 
   async getAll(paginationArgs: PaginationArgs) {
@@ -30,18 +26,10 @@ export class SeatsService {
   }
 
   async update(id: number, data: UpdateSeatDto) {
-    try {
-      return await this.prismaService.seat.update({ where: { id }, data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.seat.update({ where: { id }, data }))
   }
 
   async delete(id: number) {
-    try {
-      return await this.prismaService.seat.delete({ where: { id } })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.seat.delete({ where: { id } }))
   }
 }

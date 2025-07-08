@@ -2,36 +2,35 @@ import { Injectable } from '@nestjs/common'
 import { CreateMovieDto } from './dto/create-movie.dto'
 import { UpdateMovieDto } from './dto/update-movie.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { MovieCategoriesService } from 'src/movie-categories/movie-categories.service'
-import { CategoriesService } from 'src/categories/categories.service'
 import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
 import { MovieWithCategories } from './entities/movie-with-categories'
 import { CacheService } from '../common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
+import { handle } from 'src/common/utilities/handle.utility'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class MoviesService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly movieCategoriesService: MovieCategoriesService,
-    private readonly categoriesService: CategoriesService,
     private readonly cacheService: CacheService
   ) {}
 
   async create(data: CreateMovieDto) {
     try {
-      const { categoriesIds, ...rest } = data
+      const { categories, ...rest } = data
       const newMovie = await this.prismaService.movie.create({ data: rest })
-      const updatedMovie = await this.movieCategoriesService.addCategoriesToMovie(
-        newMovie,
-        categoriesIds
-      )
 
-      return updatedMovie
+      if (categories) {
+        return await this.movieCategoriesService.addToMovie(newMovie, categories)
+      } else {
+        return newMovie
+      }
     } catch (error) {
-      ErrorHandler.handle(error)
+      handle(error)
     }
   }
 
@@ -114,34 +113,23 @@ export class MoviesService {
   }
 
   async update(id: number, data: UpdateMovieDto) {
-    const { categoriesIds, ...rest } = data
-
     try {
-      const updatedMovie = await this.prismaService.movie.update({
-        where: { id },
-        data: rest
-      })
+      const { categories, ...rest } = data
+      const updatedMovie = await this.prismaService.movie.update({ where: { id }, data: rest })
 
-      if (categoriesIds) {
+      if (categories) {
         await this.movieCategoriesService.delete(id)
-        await this.movieCategoriesService.create(id, categoriesIds)
 
-        const categoriesNames = await this.categoriesService.getNamesByIds(categoriesIds)
-
-        updatedMovie['categories'] = categoriesNames
+        return await this.movieCategoriesService.addToMovie(updatedMovie, categories)
+      } else {
+        return updatedMovie
       }
-
-      return updatedMovie
     } catch (error) {
-      ErrorHandler.handle(error)
+      handle(error)
     }
   }
 
   async delete(id: number) {
-    try {
-      return await this.prismaService.movie.delete({ where: { id } })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.movie.delete({ where: { id } }))
   }
 }

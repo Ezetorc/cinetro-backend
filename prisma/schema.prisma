@@ -25,8 +25,7 @@ model Movie {
 }
 
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  name String @id
 
   movies MovieCategory[]
 
@@ -34,13 +33,13 @@ model Category {
 }
 
 model MovieCategory {
-  movieId    Int @map("movie_id")
-  categoryId Int @map("category_id")
+  movieId      Int    @map("movie_id")
+  categoryName String @map("category_name")
 
   movie    Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryName], references: [name], onDelete: Cascade)
 
-  @@id([movieId, categoryId])
+  @@id([movieId, categoryName])
   @@map("movie_categories")
 }
 

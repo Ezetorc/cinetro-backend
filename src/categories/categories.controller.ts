@@ -3,9 +3,9 @@ import { CategoriesService } from './categories.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import { ApiDescription } from '../common/decorators/api-description.decorator'
-import { ApiId } from '../common/decorators/api-id.decorator'
-import { Id } from '../common/decorators/id.decorator'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
+import { Name } from 'src/common/decorators/name.decorator'
+import { ApiName } from 'src/common/decorators/api-name.decorator'
 
 @Controller('categories')
 export class CategoriesController {
@@ -27,28 +27,28 @@ export class CategoriesController {
 
   @Get(':id')
   @UsePolicy('read', 'category')
-  @ApiId('Id of the category to get')
+  @ApiName('Name of the category to get')
   @ApiDescription('Category not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the category with the id given', HttpStatus.OK)
-  getById(@Id() id: number) {
-    return this.categoriesService.getById(id)
+  getById(@Name() name: string) {
+    return this.categoriesService.getById(name)
   }
 
   @Patch(':id')
   @UsePolicy('update', 'category')
-  @ApiId('Id of the category to update')
+  @ApiName('Name of the category to update')
   @ApiDescription('Category not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the category updated', HttpStatus.OK)
-  update(@Id() id: number, @Body() updateDto: UpdateCategoryDto) {
-    return this.categoriesService.update(id, updateDto)
+  update(@Name() name: string, @Body() updateDto: UpdateCategoryDto) {
+    return this.categoriesService.update(name, updateDto)
   }
 
   @Delete(':id')
   @UsePolicy('delete', 'category')
-  @ApiId('Id of the category to delete')
+  @ApiName('Name of the category to delete')
   @ApiDescription('Category not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the category deleted', HttpStatus.OK)
-  delete(@Id() id: number) {
-    return this.categoriesService.delete(id)
+  delete(@Name() name: string) {
+    return this.categoriesService.delete(name)
   }
 }

@@ -2,11 +2,11 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { PrismaService } from '../common/services/prisma.service'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { User } from '@prisma/client'
 import { AuthService } from 'src/auth/auth.service'
 import { UserWithRoles } from './entities/user-with-roles.entity'
 import { UserRolesService } from 'src/user-roles/user-roles.service'
+import { handle } from 'src/common/utilities/handle.utility'
 
 @Injectable()
 export class UsersService {
@@ -40,7 +40,7 @@ export class UsersService {
         return user
       }
     } catch (error) {
-      ErrorHandler.handle(error)
+      handle(error)
     }
   }
 
@@ -114,7 +114,7 @@ export class UsersService {
         return user
       }
     } catch (error) {
-      ErrorHandler.handle(error)
+      handle(error)
     }
   }
 
@@ -131,7 +131,7 @@ export class UsersService {
         return user
       }
     } catch (error) {
-      ErrorHandler.handle(error)
+      handle(error)
     }
   }
 }

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { CreateScreeningDto } from './dto/create-screening.dto'
 import { UpdateScreeningDto } from './dto/update-screening.dto'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { PrismaService } from '../common/services/prisma.service'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { Screening } from '@prisma/client'
 import { CacheService } from 'src/common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class ScreeningsService {
@@ -16,11 +16,7 @@ export class ScreeningsService {
   ) {}
 
   async create(data: CreateScreeningDto) {
-    try {
-      return await this.prismaService.screening.create({ data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.screening.create({ data }))
   }
 
   async getAll(paginationArgs: PaginationArgs) {
@@ -44,18 +40,10 @@ export class ScreeningsService {
   }
 
   async update(id: number, data: UpdateScreeningDto) {
-    try {
-      return await this.prismaService.screening.update({ where: { id }, data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.screening.update({ where: { id }, data }))
   }
 
   async delete(id: number) {
-    try {
-      return await this.prismaService.screening.delete({ where: { id } })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.screening.delete({ where: { id } }))
   }
 }

@@ -1,50 +1,36 @@
 import { Injectable } from '@nestjs/common'
 import { Movie } from '@prisma/client'
-import { CategoriesService } from 'src/categories/categories.service'
 import { PrismaService } from 'src/common/services/prisma.service'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class MovieCategoriesService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly categoriesService: CategoriesService
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async getAll() {
-    return await this.prismaService.movieCategory.findMany()
+  async create(movieId: number, categoryName: string) {
+    return await catchTo(
+      this.prismaService.movieCategory.create({ data: { movieId, categoryName } })
+    )
   }
 
-  async addCategoriesToMovie(movie: Movie, categoriesIds?: number[]) {
-    if (!categoriesIds) return movie
+  async createMany(movieId: number, categoriesNames: string[]) {
+    return await Promise.all(
+      categoriesNames.map((categoryName) => this.create(movieId, categoryName))
+    )
+  }
 
-    const hasCategories = categoriesIds?.length ? categoriesIds?.length > 0 : false
+  async addToMovie(movie: Movie, categoriesNames: string[]) {
+    const movieCategories = await this.createMany(movie.id, categoriesNames)
+    const categories = movieCategories.map((movieCategory) => movieCategory.categoryName as string)
 
-    if (hasCategories) {
-      await this.create(movie.id, categoriesIds)
+    return { ...movie, categories }
+  }
 
-      const categoriesNames = await this.categoriesService.getNamesByIds(categoriesIds)
-
-      movie['categories'] = categoriesNames
-    }
-
-    return movie
+  async getAll() {
+    return await catchTo(this.prismaService.movieCategory.findMany())
   }
 
   async delete(movieId: number) {
-    return await this.prismaService.movieCategory.deleteMany({
-      where: { movieId }
-    })
-  }
-
-  async create(movieId: number, categoriesIds: number[]) {
-    await Promise.all(
-      categoriesIds.map((categoryId) =>
-        this.prismaService.movieCategory.upsert({
-          where: { movieId_categoryId: { movieId, categoryId } },
-          update: {},
-          create: { movieId, categoryId }
-        })
-      )
-    )
+    return await catchTo(this.prismaService.movieCategory.deleteMany({ where: { movieId } }))
   }
 }

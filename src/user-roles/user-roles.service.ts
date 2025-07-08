@@ -4,24 +4,20 @@ import { PrismaService } from 'src/common/services/prisma.service'
 import { RoleName } from 'src/common/enums/role-name.enum'
 import { User } from '@prisma/client'
 import { Roles } from 'src/common/types/roles.type'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { UpdateUserRoleDto } from './dto/update-user-role.dto'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class UserRolesService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(data: CreateUserRoleDto) {
-    try {
-      return await this.prismaService.userRole.create({ data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.userRole.create({ data }))
   }
 
   async update(data: UpdateUserRoleDto) {
-    try {
-      return await this.prismaService.userRole.update({
+    return await catchTo(
+      this.prismaService.userRole.update({
         where: {
           userId_roleName: {
             userId: data.userId,
@@ -30,9 +26,7 @@ export class UserRolesService {
         },
         data
       })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    )
   }
 
   async getRolesOf(user: User): Promise<Roles> {

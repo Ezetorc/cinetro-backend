@@ -1,20 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { CreateTicketDto } from './dto/create-ticket.dto'
 import { UpdateTicketDto } from './dto/update-ticket.dto'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { PrismaService } from '../common/services/prisma.service'
 import { TicketWithCinemaId } from './entities/ticket-with-cinema-id.entity'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class TicketsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(data: CreateTicketDto) {
-    try {
-      return await this.prismaService.ticket.create({ data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.ticket.create({ data }))
   }
 
   async getOfUser(userId: number) {
@@ -80,18 +76,10 @@ export class TicketsService {
   }
 
   async update(id: number, data: UpdateTicketDto) {
-    try {
-      return await this.prismaService.ticket.update({ where: { id }, data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.ticket.update({ where: { id }, data }))
   }
 
   async delete(id: number) {
-    try {
-      return await this.prismaService.ticket.delete({ where: { id } })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.ticket.delete({ where: { id } }))
   }
 }

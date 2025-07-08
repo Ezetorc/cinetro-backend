@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { CreateCinemaDto } from './dto/create-cinema.dto'
 import { UpdateCinemaDto } from './dto/update-cinema.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { ErrorHandler } from 'src/common/helpers/error-handler.helper'
 import { Cinema } from '@prisma/client'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { CacheService } from 'src/common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class CinemasService {
@@ -40,18 +40,10 @@ export class CinemasService {
   }
 
   async update(id: number, data: UpdateCinemaDto) {
-    try {
-      return await this.prismaService.cinema.update({ where: { id }, data })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.cinema.update({ where: { id }, data }))
   }
 
   async delete(id: number) {
-    try {
-      return await this.prismaService.cinema.delete({ where: { id } })
-    } catch (error) {
-      ErrorHandler.handle(error)
-    }
+    return await catchTo(this.prismaService.cinema.delete({ where: { id } }))
   }
 }
