@@ -6,8 +6,8 @@ import { RegisterUserDto } from './dto/register-user.dto'
 import { SanitizedUser } from 'src/users/entities/sanitized-user.entity'
 import { ApiBody } from '@nestjs/swagger'
 import { ApiDescription } from 'src/common/decorators/api-description.decorator'
-import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
+import { Request } from 'express'
 
 @Controller('auth')
 export class AuthController {
@@ -18,7 +18,7 @@ export class AuthController {
 
   @Post('login')
   @UsePolicy('create', 'user:authorization')
-  @ApiDescription('Returns JWT Token', HttpStatus.OK)
+  @ApiDescription('Returns JWT Token and user', HttpStatus.OK)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   @ApiBody({ type: LoginUserDto })
   async login(@Body() loginDto: LoginUserDto) {
@@ -35,13 +35,15 @@ export class AuthController {
 
   @Post('register')
   @UsePolicy('create', 'user:own')
-  @ApiDescription('Returns JWT Token', HttpStatus.CREATED)
+  @ApiDescription('Returns JWT Token and user', HttpStatus.CREATED)
   @ApiDescription('Invalid credentials', HttpStatus.BAD_REQUEST)
   async register(@Body() registerDto: RegisterUserDto) {
     const userData = await this.authService.register(registerDto)
 
     if (userData) {
-      return new SanitizedUser(userData.user)
+      const sanitizedUser = new SanitizedUser(userData.user)
+
+      return { ...userData, user: sanitizedUser }
     } else {
       throw new UnauthorizedException('Invalid credentials')
     }
@@ -51,8 +53,11 @@ export class AuthController {
   @UsePolicy('read', 'user:own')
   @ApiDescription('Returns user data', HttpStatus.OK)
   @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
-  async getSelf(@Req() request: AuthenticatedRequest) {
-    const userId = request.user.id
+  async getSelf(@Req() request: Request) {
+    const userId = request.user?.id
+
+    if (userId === undefined) return null
+
     const user = await this.usersService.getById(userId, 'withRoles')
 
     if (user) {
