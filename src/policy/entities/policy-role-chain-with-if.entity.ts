@@ -1,5 +1,5 @@
+import { Resource } from './../types/resource.type'
 import { Action, pureActions } from '../types/action.type'
-import { Resource } from '../types/resource.type'
 import { PolicyRoleChain } from './policy-role-chain.entity'
 import { PolicyRole } from './policy-role.entity'
 import { PolicyRule } from './policy-rule.entity'
@@ -17,26 +17,34 @@ export class PolicyRoleChainWithIf extends PolicyRoleChain {
 
   private _setIf(action: Action, resource: Resource) {
     if (action === 'manage') {
-      this.if = (condition: PolicyRule['condition']) => {
-        for (const action of pureActions) {
-          const finalRule = this._getFinalRule(action, resource)
-
-          if (!finalRule) return this
-
-          finalRule.condition = condition
-        }
-
-        return this
-      }
+      this._setIfWithMultipleActions(resource)
     } else {
-      const rule = this._policyRole.getRule(action, resource)
+      this._setIfWithSingleAction(action, resource)
+    }
+  }
 
-      if (!rule) return
+  private _setIfWithSingleAction(action: Action, resource: Resource) {
+    const rule = this._policyRole.getRule(action, resource)
 
-      this.if = (condition: PolicyRule['condition']) => {
-        rule.condition = condition
-        return this
+    if (!rule) return
+
+    this.if = (condition: PolicyRule['condition']) => {
+      rule.condition = condition
+      return this
+    }
+  }
+
+  private _setIfWithMultipleActions(resource: Resource) {
+    this.if = (condition: PolicyRule['condition']) => {
+      for (const action of pureActions) {
+        const finalRule = this._getFinalRule(action, resource)
+
+        if (!finalRule) return this
+
+        finalRule.condition = condition
       }
+
+      return this
     }
   }
 

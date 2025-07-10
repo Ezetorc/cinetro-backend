@@ -5,19 +5,25 @@ import { PrismaService } from 'src/common/services/prisma.service'
 import { PaginationArgs } from '../common/dto/pagination-args.dto'
 import { Room } from '@prisma/client'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
+import { CacheService } from 'src/common/services/cache.service'
+import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cacheService: CacheService
+  ) {}
 
   async create(data: CreateRoomDto) {
     return await catchTo(this.prismaService.room.create({ data }))
   }
 
   async getAll(paginationArgs: PaginationArgs) {
-    return await this.prismaService.paginate<Room>({
-      model: 'room',
-      paginationArgs
+    return await this.cacheService.cached({
+      key: CacheKeys.PAGINATED_ROOMS(paginationArgs),
+      ttl: '1d',
+      fn: () => this.prismaService.paginate<Room>({ model: 'room', paginationArgs })
     })
   }
 

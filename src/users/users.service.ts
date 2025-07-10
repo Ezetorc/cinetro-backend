@@ -6,7 +6,8 @@ import { User } from '@prisma/client'
 import { AuthService } from 'src/auth/auth.service'
 import { UserWithRoles } from './entities/user-with-roles.entity'
 import { UserRolesService } from 'src/user-roles/user-roles.service'
-import { handle } from 'src/common/utilities/handle.utility'
+import { tryTo } from 'src/common/utilities/try-to.utility'
+import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
 export class UsersService {
@@ -19,28 +20,20 @@ export class UsersService {
 
   async create(data: CreateUserDto, withRoles: 'withRoles'): Promise<UserWithRoles>
   async create(data: CreateUserDto, withRoles?: undefined): Promise<User>
-  async create(
-    data: CreateUserDto,
-    withRoles?: 'withRoles'
-  ): Promise<User | UserWithRoles | undefined> {
+  async create(data: CreateUserDto, withRoles?: 'withRoles') {
     const hashedPassword = await this.authService.hash(data.password)
+    const [user] = await tryTo(
+      this.prismaService.user.create({ data: { ...data, password: hashedPassword } })
+    )
 
-    try {
-      const user = await this.prismaService.user.create({
-        data: {
-          ...data,
-          password: hashedPassword
-        }
-      })
+    if (!user) return null
 
-      if (withRoles === 'withRoles') {
-        const roles = await this.userRolesService.getRolesOf(user)
-        return new UserWithRoles(user, roles)
-      } else {
-        return user
-      }
-    } catch (error) {
-      handle(error)
+    if (withRoles === 'withRoles') {
+      const roles = await this.userRolesService.getRolesOf(user)
+
+      return new UserWithRoles(user, roles)
+    } else {
+      return user
     }
   }
 
@@ -50,9 +43,8 @@ export class UsersService {
     const users = await this.prismaService.user.findMany()
 
     if (withRoles === 'withRoles') {
-      const allRoles = await Promise.all(
-        users.map((user) => this.userRolesService.getRolesOf(user))
-      )
+      const allRoles = await this.userRolesService.getRolesOf(users)
+
       return UserWithRoles.getMany(users, allRoles)
     } else {
       return users
@@ -68,6 +60,7 @@ export class UsersService {
 
     if (withRoles === 'withRoles') {
       const roles = await this.userRolesService.getRolesOf(user)
+
       return new UserWithRoles(user, roles)
     } else {
       return user
@@ -83,6 +76,7 @@ export class UsersService {
 
     if (withRoles === 'withRoles') {
       const roles = await this.userRolesService.getRolesOf(user)
+
       return new UserWithRoles(user, roles)
     } else {
       return user
@@ -96,42 +90,29 @@ export class UsersService {
 
   async update(id: number, data: UpdateUserDto, withRoles: 'withRoles'): Promise<UserWithRoles>
   async update(id: number, data: UpdateUserDto, withRoles?: undefined): Promise<User>
-  async update(
-    id: number,
-    data: UpdateUserDto,
-    withRoles?: 'withRoles'
-  ): Promise<User | UserWithRoles | undefined> {
-    try {
-      const user = await this.prismaService.user.update({
-        where: { id },
-        data
-      })
+  async update(id: number, data: UpdateUserDto, withRoles?: 'withRoles') {
+    const user = await catchTo(this.prismaService.user.update({ where: { id }, data }))
 
-      if (withRoles === 'withRoles') {
-        const roles = await this.userRolesService.getRolesOf(user)
-        return new UserWithRoles(user, roles)
-      } else {
-        return user
-      }
-    } catch (error) {
-      handle(error)
+    if (withRoles === 'withRoles') {
+      const roles = await this.userRolesService.getRolesOf(user)
+
+      return new UserWithRoles(user, roles)
+    } else {
+      return user
     }
   }
 
   async delete(id: number, withRoles: 'withRoles'): Promise<UserWithRoles>
   async delete(id: number, withRoles?: undefined): Promise<User>
   async delete(id: number, withRoles?: 'withRoles'): Promise<User | UserWithRoles | undefined> {
-    try {
-      const user = await this.prismaService.user.delete({ where: { id } })
+    const user = await catchTo(this.prismaService.user.delete({ where: { id } }))
 
-      if (withRoles === 'withRoles') {
-        const roles = await this.userRolesService.getRolesOf(user)
-        return new UserWithRoles(user, roles)
-      } else {
-        return user
-      }
-    } catch (error) {
-      handle(error)
+    if (withRoles === 'withRoles') {
+      const roles = await this.userRolesService.getRolesOf(user)
+
+      return new UserWithRoles(user, roles)
+    } else {
+      return user
     }
   }
 }

@@ -28,10 +28,12 @@ export class PolicyService {
   async getResource(resource: Resource, request: Request) {
     if (resource === 'all' || request === null) return null
 
-    const method = this[resource] as ((request: Request) => Promise<object | null>) | null
+    const method = this[resource] as
+      | ((request: Request) => Promise<object | object[] | null>)
+      | null
 
     if (!method) return null
 
-    return (await method.call(this, request)) as object | null
+    return (await method.call(this, request)) as object | object[] | null
   }
 }

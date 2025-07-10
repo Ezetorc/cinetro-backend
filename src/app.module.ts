@@ -19,7 +19,7 @@ import { UserRolesModule } from './user-roles/user-roles.module'
 import { PolicyModule } from './policy/policy.module'
 import { PolicyGuard } from './policy/guards/policy.guard'
 import { JwtGuard } from './auth/guards/jwt.guard'
-import { MovieCategoriesModule } from './movie-categories/movie-categories.module';
+import { MovieCategoriesModule } from './movie-categories/movie-categories.module'
 
 @Module({
   imports: [

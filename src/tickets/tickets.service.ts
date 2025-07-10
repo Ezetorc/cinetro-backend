@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common'
 import { CreateTicketDto } from './dto/create-ticket.dto'
 import { UpdateTicketDto } from './dto/update-ticket.dto'
 import { PrismaService } from '../common/services/prisma.service'
-import { TicketWithCinemaId } from './entities/ticket-with-cinema-id.entity'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
 
 @Injectable()
@@ -20,33 +20,19 @@ export class TicketsService {
   async getOfUserWithCinemaId(userId: number) {
     const tickets = await this.prismaService.ticket.findMany({
       where: { userId },
-      include: {
-        screening: {
-          include: {
-            room: {
-              select: {
-                cinemaId: true
-              }
-            }
-          }
-        }
-      }
+      include: { screening: { include: { room: { select: { cinemaId: true } } } } }
     })
 
     return tickets.map((ticket) => {
-      return new TicketWithCinemaId(ticket, ticket.screening.room.cinemaId)
+      const { screening: _, ...rest } = ticket
+
+      return { ...rest, cinemaId: ticket.screening.room.cinemaId }
     })
   }
 
   async getAllOfCinema(cinemaId: number) {
     return await this.prismaService.ticket.findMany({
-      where: {
-        screening: {
-          room: {
-            cinemaId
-          }
-        }
-      }
+      where: { screening: { room: { cinemaId } } }
     })
   }
 
@@ -57,22 +43,14 @@ export class TicketsService {
   async getByIdWithCinemaId(id: number) {
     const ticket = await this.prismaService.ticket.findUnique({
       where: { id },
-      include: {
-        screening: {
-          include: {
-            room: {
-              select: {
-                cinemaId: true
-              }
-            }
-          }
-        }
-      }
+      include: { screening: { include: { room: { select: { cinemaId: true } } } } }
     })
 
     if (!ticket) return null
 
-    return new TicketWithCinemaId(ticket, ticket.screening.room.cinemaId)
+    const { screening: _, ...rest } = ticket
+
+    return { ...rest, cinemaId: ticket.screening.room.cinemaId }
   }
 
   async update(id: number, data: UpdateTicketDto) {

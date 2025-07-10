@@ -15,10 +15,7 @@ export class SeatsService {
   }
 
   async getAll(paginationArgs: PaginationArgs) {
-    return await this.prismaService.paginate<Seat>({
-      model: 'seat',
-      paginationArgs
-    })
+    return await this.prismaService.paginate<Seat>({ model: 'seat', paginationArgs })
   }
 
   async getById(id: number) {

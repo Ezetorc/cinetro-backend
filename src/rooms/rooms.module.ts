@@ -1,3 +1,4 @@
+import { CacheService } from './../common/services/cache.service'
 import { Module } from '@nestjs/common'
 import { RoomsService } from './rooms.service'
 import { RoomsController } from './rooms.controller'
@@ -7,6 +8,6 @@ import { TicketsService } from 'src/tickets/tickets.service'
 
 @Module({
   controllers: [RoomsController],
-  providers: [RoomsService, PrismaService, PolicyService, TicketsService]
+  providers: [RoomsService, PrismaService, PolicyService, TicketsService, CacheService]
 })
 export class RoomsModule {}

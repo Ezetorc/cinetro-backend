@@ -18,32 +18,37 @@ export class UserRolesService {
   async update(data: UpdateUserRoleDto) {
     return await catchTo(
       this.prismaService.userRole.update({
-        where: {
-          userId_roleName: {
-            userId: data.userId,
-            roleName: data.roleName
-          }
-        },
+        where: { userId_roleName: { userId: data.userId, roleName: data.roleName } },
         data
       })
     )
   }
 
-  async getRolesOf(user: User): Promise<Roles> {
+  async getRolesOf(user: User): Promise<Roles>
+  async getRolesOf(users: User[]): Promise<Roles[]>
+  async getRolesOf(userOrUsers: User | User[]): Promise<Roles | Roles[]> {
+    const isArray = Array.isArray(userOrUsers)
+
+    if (isArray) {
+      return await this._getRolesOfMultiple(userOrUsers)
+    } else {
+      return await this._getRolesOfSingular(userOrUsers)
+    }
+  }
+
+  private async _getRolesOfSingular(user: User) {
     const userRoles = await this.prismaService.userRole.findMany({
       where: { userId: user.id },
-      include: {
-        role: {
-          select: {
-            name: true
-          }
-        }
-      }
+      include: { role: { select: { name: true } } }
     })
 
     return userRoles.map((userRole) => ({
       name: userRole.role.name as RoleName,
       cinemaId: userRole.cinemaId
     }))
+  }
+
+  private async _getRolesOfMultiple(users: User[]) {
+    return await Promise.all(users.map((user) => this._getRolesOfSingular(user)))
   }
 }

@@ -23,11 +23,7 @@ export class ScreeningsService {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_SCREENINGS(paginationArgs),
       ttl: '1h',
-      fn: () =>
-        this.prismaService.paginate<Screening>({
-          model: 'screening',
-          paginationArgs
-        })
+      fn: () => this.prismaService.paginate<Screening>({ model: 'screening', paginationArgs })
     })
   }
 

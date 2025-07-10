@@ -68,7 +68,6 @@ export class MoviesController {
   @ApiId('Id of the movie to update')
   @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the movie updated', HttpStatus.OK)
-  // @OnlyEmployees()
   update(@Id() id: number, @Body() updateDto: UpdateMovieDto) {
     return this.moviesService.update(id, updateDto)
   }
@@ -78,7 +77,6 @@ export class MoviesController {
   @ApiId('Id of the movie to delete')
   @ApiDescription('Movie not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the movie deleted', HttpStatus.OK)
-  // @OnlyEmployees()
   delete(@Id() id: number) {
     return this.moviesService.delete(id)
   }

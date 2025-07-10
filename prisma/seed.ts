@@ -18,11 +18,11 @@ async function main() {
   const saltRounds = 10
   const hashedPassword = await bcrypt.hash('123456', saltRounds)
 
-  // Categorías
+  // Categories
   const action = await prisma.category.create({ data: { name: 'Action' } })
   const drama = await prisma.category.create({ data: { name: 'Drama' } })
 
-  // Películas
+  // Movies
   const movie1 = await prisma.movie.create({
     data: {
       title: 'Fast & Curious',
@@ -55,7 +55,7 @@ async function main() {
     }
   })
 
-  // Cines
+  // Cinemas
   const cinema1 = await prisma.cinema.create({
     data: {
       name: 'Cinepolis Central',
@@ -74,7 +74,7 @@ async function main() {
     }
   })
 
-  // Salas
+  // Rooms
   const room1 = await prisma.room.create({
     data: {
       name: 'Sala 1',
@@ -124,7 +124,7 @@ async function main() {
     }
   })
 
-  // Asientos
+  // Seats
   const seatA1 = await prisma.seat.create({
     data: { roomId: room1.id, row: 'A', number: 1 }
   })
@@ -133,7 +133,7 @@ async function main() {
     data: { roomId: room1.id, row: 'B', number: 2 }
   })
 
-  // Proyecciones
+  // Screenings
   const screening1 = await prisma.screening.create({
     data: {
       movieId: movie1.id,
@@ -152,7 +152,7 @@ async function main() {
     }
   })
 
-  // Usuarios
+  // Users
   const user1 = await prisma.user.create({
     data: {
       name: 'admin',
@@ -233,12 +233,12 @@ async function main() {
     }
   })
 
-  console.log('✅ Seed ejecutado correctamente')
+  console.log('✅ Mock tables generated')
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Error en seed:', e)
+  .catch((error) => {
+    console.error('❌ Error during mock tables generation:', error)
     process.exit(1)
   })
   .finally(() => {

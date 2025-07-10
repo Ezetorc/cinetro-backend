@@ -30,8 +30,6 @@ user
   .if<Ticket>((user, ticket) => user.id === ticket.userId)
   .canAlso('read', 'screening:all')
   .canAlso('read', 'user:own')
-  .canAlso('create', 'user:authorization')
-  .canAlso('create', 'user:own')
 
 anyone
   .can('read', 'movie:all')

@@ -27,7 +27,6 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  // @OnlyEmployees()
   @UsePolicy('create', 'ticket')
   @ApiDescription('Returns the ticket created', HttpStatus.CREATED)
   create(@Body() createDto: CreateTicketDto) {
@@ -39,7 +38,7 @@ export class TicketsController {
   @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
   @ApiDescription('Returns an array of user tickets', HttpStatus.OK)
   @UsePolicy('read', 'ticket:own')
-  getOfSelf(@Req() request: Request) {
+  getOwn(@Req() request: Request) {
     if (request.user) {
       return this.ticketsService.getOfUser(request.user.id)
     } else {
@@ -68,7 +67,6 @@ export class TicketsController {
   @ApiId('Id of the ticket')
   @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the ticket with the given id', HttpStatus.OK)
-  // @OnlyEmployees()
   getById(@Id() id: number) {
     return this.ticketsService.getById(id)
   }
@@ -78,7 +76,6 @@ export class TicketsController {
   @ApiId('Id of the ticket')
   @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the updated ticket', HttpStatus.OK)
-  // @OnlyEmployees()
   update(@Id() id: number, @Body() updateDto: UpdateTicketDto) {
     return this.ticketsService.update(id, updateDto)
   }
@@ -88,7 +85,6 @@ export class TicketsController {
   @ApiId('Id of the ticket')
   @ApiDescription('Ticket not found', HttpStatus.NOT_FOUND)
   @ApiDescription('Returns the deleted ticket', HttpStatus.OK)
-  // @OnlyEmployees()
   delete(@Id() id: number) {
     return this.ticketsService.delete(id)
   }
