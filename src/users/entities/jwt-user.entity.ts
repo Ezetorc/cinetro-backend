@@ -5,6 +5,7 @@ import { policy } from 'src/configuration/policy.configuration'
 import { Action } from 'src/policy/types/action.type'
 import { Resource } from 'src/policy/types/resource.type'
 import { isEmployee } from 'src/common/utilities/is-employee.utility'
+import { Policy } from 'src/policy/entities/policy.entity'
 
 export class JWTUser {
   constructor(user: UserWithRoles) {
@@ -34,13 +35,11 @@ export class JWTUser {
     const roleNames = new Set(this.roles.map((role) => role.name))
 
     return policy.rules.find((rule) => {
-      const [roleName, ruleAction, ruleResource] = rule.key.split('/') as [
-        RoleName,
-        Action,
-        Resource
-      ]
+      const { roleName, action: ruleAction, resource: ruleResource } = Policy.splitRule(rule)
 
-      return roleNames.has(roleName) && ruleAction === action && ruleResource === resource
+      return (
+        roleNames.has(roleName as RoleName) && ruleAction === action && ruleResource === resource
+      )
     })
   }
 }

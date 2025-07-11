@@ -1,10 +1,12 @@
 import { INestApplication } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { Application } from 'express'
 import { SWAGGER_CONFIG } from 'src/configuration/swagger.configuration'
 import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes'
 
 export class App {
+  public configService: ConfigService
   private app: INestApplication
   private swaggerConfig = new DocumentBuilder()
     .setTitle(SWAGGER_CONFIG.title)
@@ -16,6 +18,7 @@ export class App {
 
   constructor(app: INestApplication) {
     this.app = app
+    this.configService = app.get(ConfigService)
   }
 
   setupSwagger(): App {
@@ -31,12 +34,16 @@ export class App {
     return this
   }
 
-  disableHeader(header: string): App {
+  removeHeader(header: string): App {
     const expressApp = this.app.getHttpAdapter().getInstance() as Application
 
     expressApp.disable(header)
 
     return this
+  }
+
+  get port(): number {
+    return this.configService.getOrThrow<number>('port')
   }
 
   get nest(): INestApplication {

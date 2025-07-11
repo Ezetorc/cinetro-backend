@@ -9,7 +9,6 @@ import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { PolicyService } from 'src/policy/policy.service'
 import { TicketsService } from 'src/tickets/tickets.service'
 
 @Module({
@@ -26,14 +25,7 @@ import { TicketsService } from 'src/tickets/tickets.service'
     })
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    UserRolesService,
-    PrismaService,
-    PolicyService,
-    TicketsService
-  ],
+  providers: [AuthService, JwtStrategy, UserRolesService, PrismaService, TicketsService],
   exports: [AuthService]
 })
 export class AuthModule {}

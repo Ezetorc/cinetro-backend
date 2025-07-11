@@ -1,7 +1,7 @@
 import { Action } from '../types/action.type'
+import { PolicyRule } from '../types/policy-rule.type'
 import { Resource } from '../types/resource.type'
 import { PolicyRole } from './policy-role.entity'
-import { PolicyRule } from './policy-rule.entity'
 
 export class Policy {
   private _roles: PolicyRole[] = [new PolicyRole(this, 'anyone')]
@@ -23,7 +23,7 @@ export class Policy {
   }
 
   addRule(rule: PolicyRule) {
-    const { roleName } = PolicyRule.splitKey(rule.key)
+    const { roleName } = Policy.splitRule(rule)
     const policyRole = this._roles.find((role) => role.name === roleName)
 
     if (policyRole) {
@@ -37,11 +37,21 @@ export class Policy {
     if (!policyRole) return undefined
 
     return policyRole.rules.find((rule) => {
-      const { action, resource } = PolicyRule.splitKey(rule.key)
+      const { action, resource } = Policy.splitRule(rule)
       const actionMatches = action === args.action
       const resourceMatches = resource === args.resource
 
       return actionMatches && resourceMatches
     })
+  }
+
+  static splitRule(key: PolicyRule) {
+    const [roleName, action, resource] = key.split('/') as [string, Action, Resource]
+
+    return { roleName, action, resource }
+  }
+
+  static createRule(roleName: string, action: Action, resource: Resource): PolicyRule {
+    return `${roleName}/${action}/${resource}`
   }
 }

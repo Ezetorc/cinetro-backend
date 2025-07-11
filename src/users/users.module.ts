@@ -4,13 +4,12 @@ import { UsersController } from './users.controller'
 import { PrismaService } from 'src/common/services/prisma.service'
 import { UserRolesModule } from 'src/user-roles/user-roles.module'
 import { AuthModule } from 'src/auth/auth.module'
-import { PolicyService } from 'src/policy/policy.service'
 import { TicketsService } from 'src/tickets/tickets.service'
 
 @Module({
   imports: [forwardRef(() => AuthModule), UserRolesModule],
   controllers: [UsersController],
-  providers: [UsersService, PrismaService, PolicyService, TicketsService],
+  providers: [UsersService, PrismaService, TicketsService],
   exports: [UsersService]
 })
 export class UsersModule {}

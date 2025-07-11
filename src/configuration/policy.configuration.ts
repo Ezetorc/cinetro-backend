@@ -1,7 +1,5 @@
-import { Ticket, UserRole } from '@prisma/client'
 import { RoleName } from 'src/common/enums/role-name.enum'
 import { Policy } from 'src/policy/entities/policy.entity'
-import { TicketWithCinemaId } from 'src/tickets/entities/ticket-with-cinema-id.entity'
 
 export const policy = new Policy()
 const anyone = policy.anyone
@@ -13,21 +11,15 @@ const user = policy.addRole(RoleName.USER)
 
 admin.can('manage', 'all')
 
-operator
-  .extends(manager)
-  .canAlso('create', 'user-role')
-  .if<UserRole>((user, userRole) => userRole.userId === user.id)
+operator.extends(manager).canAlso('create', 'user-role')
 
 manager.extends(cashier)
 
-cashier
-  .extends(user)
-  .canAlso('manage', 'ticket:of-cinema')
-  .if<TicketWithCinemaId>((user, resource) => user.worksInCinema(resource.cinemaId))
+cashier.extends(user).canAlso('manage', 'ticket:of-cinema')
 
 user
-  .can('read', 'ticket:own')
-  .if<Ticket>((user, ticket) => user.id === ticket.userId)
+  .extends(anyone)
+  .canAlso('read', 'ticket:own')
   .canAlso('read', 'screening:all')
   .canAlso('read', 'user:own')
 
