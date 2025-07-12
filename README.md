@@ -1,6 +1,6 @@
-# 🌍 Cinemax - Cinema Tickets Shop (Backend)
+# 🌍 Cinetro - Cinema Tickets Shop (Backend)
 
-**Cinemax** is a cinema tickets shop project designed to practice API development, database management, and frontend implementation.
+**Cinetro** is a cinema tickets shop project designed to practice API development, database management, and frontend implementation.
 
 ## Contact
 

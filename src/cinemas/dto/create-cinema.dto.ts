@@ -4,7 +4,7 @@ import { IsLatitude, IsLongitude, IsString } from 'class-validator'
 export class CreateCinemaDto {
   @ApiProperty({
     description: 'Name of the cinema',
-    example: 'San Justo Cinemax'
+    example: 'San Justo Cinetro'
   })
   @IsString()
   name: string

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ForbiddenException,
   Req
 } from '@nestjs/common'
 import { TicketsService } from './tickets.service'
@@ -18,6 +19,7 @@ import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 import { ApiParam } from '@nestjs/swagger'
+import { isEmployee } from 'src/common/utilities/is-employee.utility'
 import { Request } from 'express'
 
 @Controller('tickets')
@@ -47,8 +49,16 @@ export class TicketsController {
   @ApiParam({ name: 'cinemaId', description: 'Id of the cinema' })
   @ApiDescription('Returns an array of tickets of an specific cinema')
   @UsePolicy('read', 'ticket:of-cinema')
-  getAllOfCinema(@Param('cinemaId', ParseIntPipe) cinemaId: number) {
-    return this.ticketsService.getAllOfCinema(cinemaId)
+  getAllOfCinema(@Param('cinemaId', ParseIntPipe) cinemaId: number, @Req() request: Request) {
+    const userWorksInCinema = request.user?.roles.some(
+      (role) => isEmployee(role.name) && role.cinemaId === cinemaId
+    )
+
+    if (userWorksInCinema) {
+      return this.ticketsService.getAllOfCinema(cinemaId)
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
   @Get(':id')

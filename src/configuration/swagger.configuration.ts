@@ -1,7 +1,7 @@
 import { SwaggerConfig } from 'src/common/types/swagger-config.type'
 
 export const SWAGGER_CONFIG: SwaggerConfig = {
-  title: 'Cinemax',
+  title: 'Cinetro',
   description: 'Cinema tickets shop API',
   version: '1.0',
   securityRequirements: 'bearer',
