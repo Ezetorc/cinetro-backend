@@ -238,7 +238,8 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error('❌ Error during mock tables generation:', error)
+    console.error('❌ Error during mock tables generation: ', error)
+    console.error('❌ Try generating the tables with: npx prisma db push')
     process.exit(1)
   })
   .finally(() => {

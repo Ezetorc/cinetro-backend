@@ -4,7 +4,12 @@ import { Resource } from '../types/resource.type'
 import { PolicyRole } from './policy-role.entity'
 
 export class Policy {
+  constructor(props: { adminRole: string }) {
+    this.adminRole = props.adminRole
+  }
+
   private _roles: PolicyRole[] = [new PolicyRole(this, 'anyone')]
+  public adminRole: string
 
   get anyone() {
     return this._roles[0]

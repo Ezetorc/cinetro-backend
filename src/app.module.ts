@@ -36,7 +36,11 @@ import { MovieCategoriesModule } from './movie-categories/movie-categories.modul
         store: await redisStore({
           socket: {
             host: configService.getOrThrow<string>('redis.host'),
-            port: configService.getOrThrow<number>('redis.port')
+            port: configService.getOrThrow<number>('redis.port'),
+            reconnectStrategy: (retries) => {
+              if (retries > 5) return new Error('No se puede reconectar a Redis')
+              return Math.min(retries * 100, 3000)
+            }
           }
         })
       })

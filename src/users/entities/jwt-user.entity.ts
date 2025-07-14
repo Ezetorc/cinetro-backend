@@ -16,6 +16,10 @@ export class JWTUser {
   id: number
   roles: Roles
 
+  get isAdmin() {
+    return this.hasRole(policy.adminRole as RoleName)
+  }
+
   toPlain() {
     return {
       id: this.id,

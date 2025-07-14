@@ -6,7 +6,6 @@ import { Action } from 'src/policy/types/action.type'
 import { Request } from 'express'
 import { policy } from 'src/configuration/policy.configuration'
 import { JWTUser } from 'src/users/entities/jwt-user.entity'
-import { RoleName } from 'src/common/enums/role-name.enum'
 
 @Injectable()
 export class PolicyGuard implements CanActivate {
@@ -18,23 +17,23 @@ export class PolicyGuard implements CanActivate {
     const [action, resource] = this.reflector.get<[Action, Resource]>(Key.POLICY, handler)
 
     if (request.user) {
-      if (request.user.hasRole(RoleName.ADMIN)) {
+      if (request.user.isAdmin) {
         return true
       } else {
-        return this.handleAuthenticatedAccess(request.user, action, resource)
+        return this.handleAuthenticatedAccess(action, resource, request.user)
       }
     } else {
       return this.handleUnauthenticatedAccess(action, resource)
     }
   }
 
-  private handleAuthenticatedAccess(user: JWTUser, action: Action, resource: Resource) {
+  handleAuthenticatedAccess(action: Action, resource: Resource, user: JWTUser) {
     const rule = user.getRule(action, resource)
 
     return Boolean(rule)
   }
 
-  private handleUnauthenticatedAccess(action: Action, resource: Resource) {
+  handleUnauthenticatedAccess(action: Action, resource: Resource) {
     const rule = policy.getRule({ roleName: 'anyone', action, resource })
 
     return Boolean(rule)
