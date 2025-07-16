@@ -3,7 +3,7 @@ import { CreateCinemaDto } from './dto/create-cinema.dto'
 import { UpdateCinemaDto } from './dto/update-cinema.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
 import { Cinema } from '@prisma/client'
-import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { PaginationDto } from '../common/dto/pagination-args.dto'
 import { CacheService } from 'src/common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
@@ -19,14 +19,14 @@ export class CinemasService {
     return await this.prismaService.cinema.create({ data })
   }
 
-  async getAll(paginationArgs: PaginationArgs) {
+  async getAll(paginationDto: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_CINEMAS(paginationArgs),
+      key: CacheKeys.PAGINATED_CINEMAS(paginationDto),
       ttl: '1d',
       fn: () =>
         this.prismaService.paginate<Cinema>({
           model: 'cinema',
-          paginationArgs: paginationArgs
+          dto: paginationDto
         })
     })
   }

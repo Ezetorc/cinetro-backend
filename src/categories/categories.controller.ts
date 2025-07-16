@@ -6,7 +6,7 @@ import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 import { Name } from 'src/common/decorators/name.decorator'
 import { ApiName } from 'src/common/decorators/api-name.decorator'
 import { ApiPagination } from 'src/common/decorators/api-pagination.decorator'
-import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
+import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 
 @Controller('categories')
 export class CategoriesController {
@@ -23,8 +23,8 @@ export class CategoriesController {
   @UsePolicy('read', 'category:all')
   @ApiDescription('Returns an array of categories')
   @ApiPagination()
-  getAll(@Query() pagination: PaginationArgs) {
-    return this.categoriesService.getAll(pagination)
+  getAll(@Query() paginationDto: PaginationDto) {
+    return this.categoriesService.getAll(paginationDto)
   }
 
   @Get(':id')

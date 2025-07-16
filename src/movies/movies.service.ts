@@ -3,7 +3,7 @@ import { CreateMovieDto } from './dto/create-movie.dto'
 import { UpdateMovieDto } from './dto/update-movie.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
 import { MovieCategoriesService } from 'src/movie-categories/movie-categories.service'
-import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
+import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
 import { CacheService } from '../common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
@@ -31,28 +31,28 @@ export class MoviesService {
     }
   }
 
-  async getAllForPreview(paginationArgs?: PaginationArgs) {
+  async getAllForPreview(paginationDto?: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationArgs),
+      key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationDto),
       ttl: '1h',
       fn: () =>
         this.prismaService.paginate<MoviePreview>({
           model: 'movie',
-          paginationArgs,
+          dto: paginationDto,
           options: { select: { title: true, id: true, thumbnail: true } }
         })
     })
   }
 
-  async getAll(paginationArgs?: PaginationArgs) {
+  async getAll(paginationDto?: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_MOVIES(paginationArgs),
+      key: CacheKeys.PAGINATED_MOVIES(paginationDto),
       ttl: '1h',
       fn: async () => {
         const { data: movies, nextCursor } =
           await this.prismaService.paginate<MovieWithRowCategories>({
             model: 'movie',
-            paginationArgs,
+            dto: paginationDto,
             options: {
               orderBy: { releaseDate: 'asc' },
               include: { categories: { include: { category: true } } }

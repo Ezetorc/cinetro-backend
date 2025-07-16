@@ -35,16 +35,16 @@ export class PolicyRole {
   can(action: Action, resource: Resource) {
     this._addRules(action, resource)
 
-    return this._getChain()
+    return this._chain
   }
 
-  extends(...policyRoles: PolicyRole[]): Omit<PolicyRoleChain, 'if'> {
+  extends(...policyRoles: PolicyRole[]) {
     policyRoles.forEach((policyRole) => policyRole.rules.forEach((rule) => this._rules.push(rule)))
 
-    return this._getChain()
+    return this
   }
 
-  private _getChain() {
+  private get _chain() {
     return new PolicyRoleChain(this)
   }
 

@@ -6,7 +6,7 @@ import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
 import { Id } from '../common/decorators/id.decorator'
 import { ApiPagination } from '../common/decorators/api-pagination.decorator'
-import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { PaginationDto } from '../common/dto/pagination-args.dto'
 import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 
 @Controller('cinemas')
@@ -24,8 +24,8 @@ export class CinemasController {
   @UsePolicy('read', 'cinema:all')
   @ApiDescription('Returns an array of cinemas')
   @ApiPagination()
-  getAll(@Query() pagination: PaginationArgs) {
-    return this.cinemasService.getAll(pagination)
+  getAll(@Query() paginationDto: PaginationDto) {
+    return this.cinemasService.getAll(paginationDto)
   }
 
   @Get(':id')

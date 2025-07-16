@@ -19,8 +19,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async paginate<T = undefined>(params: PaginateParams): Promise<PaginateResponse<T>> {
-    const { model: modelName, paginationArgs } = params
-    const { cursor = undefined, limit = 8 } = paginationArgs || {}
+    const { model: modelName, dto } = params
+    const { cursor = undefined, limit = 8 } = dto || {}
     const model = this[modelName] as ModelDelegate
 
     const data = await model.findMany({

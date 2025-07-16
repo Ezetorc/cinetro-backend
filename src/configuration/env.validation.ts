@@ -9,7 +9,7 @@ export const envValidation = Joi.object({
   REDIS_HOST: Joi.string().default('localhost'),
   REDIS_PORT: Joi.number().default(6379),
   MYSQL_PORT: Joi.number().default(3306),
-  MYSQL_HOST: Joi.string().default('mysql'),
+  MYSQL_HOST: Joi.string().default('localhost'),
   MYSQL_USER: Joi.string().default('root'),
   MYSQL_PASSWORD: Joi.string().required(),
   MYSQL_DATABASE: Joi.string().required(),

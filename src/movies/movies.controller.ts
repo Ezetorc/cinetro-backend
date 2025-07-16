@@ -13,7 +13,7 @@ import {
 import { MoviesService } from './movies.service'
 import { CreateMovieDto } from './dto/create-movie.dto'
 import { UpdateMovieDto } from './dto/update-movie.dto'
-import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
+import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 import { ApiDescription } from '../common/decorators/api-description.decorator'
 import { ApiPagination } from '../common/decorators/api-pagination.decorator'
 import { ApiId } from '../common/decorators/api-id.decorator'
@@ -45,12 +45,12 @@ export class MoviesController {
   getAll(
     @Query('forPreview', new DefaultValuePipe(false), ParseBoolPipe)
     forPreview: boolean,
-    @Query() pagination: PaginationArgs
+    @Query() paginationDto: PaginationDto
   ) {
     if (forPreview) {
-      return this.moviesService.getAllForPreview(pagination)
+      return this.moviesService.getAllForPreview(paginationDto)
     } else {
-      return this.moviesService.getAll(pagination)
+      return this.moviesService.getAll(paginationDto)
     }
   }
 

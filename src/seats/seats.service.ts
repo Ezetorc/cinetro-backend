@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateSeatDto } from './dto/create-seat.dto'
 import { UpdateSeatDto } from './dto/update-seat.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { PaginationDto } from '../common/dto/pagination-args.dto'
 import { Seat } from '@prisma/client'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
 
@@ -14,8 +14,8 @@ export class SeatsService {
     return await catchTo(this.prismaService.seat.create({ data }))
   }
 
-  async getAll(paginationArgs: PaginationArgs) {
-    return await this.prismaService.paginate<Seat>({ model: 'seat', paginationArgs })
+  async getAll(paginationDto: PaginationDto) {
+    return await this.prismaService.paginate<Seat>({ model: 'seat', dto: paginationDto })
   }
 
   async getById(id: number) {

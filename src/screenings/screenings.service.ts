@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateScreeningDto } from './dto/create-screening.dto'
 import { UpdateScreeningDto } from './dto/update-screening.dto'
 import { PrismaService } from '../common/services/prisma.service'
-import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { PaginationDto } from '../common/dto/pagination-args.dto'
 import { Screening } from '@prisma/client'
 import { CacheService } from 'src/common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
@@ -19,11 +19,11 @@ export class ScreeningsService {
     return await catchTo(this.prismaService.screening.create({ data }))
   }
 
-  async getAll(paginationArgs: PaginationArgs) {
+  async getAll(paginationDto: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_SCREENINGS(paginationArgs),
+      key: CacheKeys.PAGINATED_SCREENINGS(paginationDto),
       ttl: '1h',
-      fn: () => this.prismaService.paginate<Screening>({ model: 'screening', paginationArgs })
+      fn: () => this.prismaService.paginate<Screening>({ model: 'screening', dto: paginationDto })
     })
   }
 

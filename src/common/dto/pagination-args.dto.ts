@@ -1,7 +1,7 @@
 import { IsOptional, IsString, IsInt, Min } from 'class-validator'
 import { Type } from 'class-transformer'
 
-export class PaginationArgs {
+export class PaginationDto {
   @IsOptional()
   @IsString()
   cursor?: string

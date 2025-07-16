@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { UpdateRoomDto } from './dto/update-room.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { PaginationArgs } from '../common/dto/pagination-args.dto'
+import { PaginationDto } from '../common/dto/pagination-args.dto'
 import { Room } from '@prisma/client'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
 import { CacheService } from 'src/common/services/cache.service'
@@ -19,11 +19,11 @@ export class RoomsService {
     return await catchTo(this.prismaService.room.create({ data }))
   }
 
-  async getAll(paginationArgs: PaginationArgs) {
+  async getAll(paginationDto: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_ROOMS(paginationArgs),
+      key: CacheKeys.PAGINATED_ROOMS(paginationDto),
       ttl: '1d',
-      fn: () => this.prismaService.paginate<Room>({ model: 'room', paginationArgs })
+      fn: () => this.prismaService.paginate<Room>({ model: 'room', dto: paginationDto })
     })
   }
 

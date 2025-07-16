@@ -4,7 +4,7 @@ import { CreateCategoryDto } from './dto/create-category.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
 import { catchTo } from 'src/common/utilities/catch-to.utility'
 import { CacheService } from 'src/common/services/cache.service'
-import { PaginationArgs } from 'src/common/dto/pagination-args.dto'
+import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 import { Category } from '@prisma/client'
 
 @Injectable()
@@ -18,14 +18,14 @@ export class CategoriesService {
     return await catchTo(this.prismaService.category.create({ data }))
   }
 
-  async getAll(paginationArgs: PaginationArgs) {
+  async getAll(paginationDto: PaginationDto) {
     return await this.cacheService.cached({
-      key: CacheKeys.PAGINATED_CATEGORIES(paginationArgs),
+      key: CacheKeys.PAGINATED_CATEGORIES(paginationDto),
       ttl: '1d',
       fn: () =>
         this.prismaService.paginate<Category>({
           model: 'category',
-          paginationArgs: paginationArgs
+          dto: paginationDto
         })
     })
   }
