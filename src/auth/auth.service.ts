@@ -33,7 +33,7 @@ export class AuthService {
   }
 
   async hash(str: string): Promise<string> {
-    return await bcrypt.hash(str, this.configService.getOrThrow('saltRounds'))
+    return await bcrypt.hash(str, this.configService.getOrThrow('jwt.saltRounds'))
   }
 
   async login(loginDto: LoginUserDto) {

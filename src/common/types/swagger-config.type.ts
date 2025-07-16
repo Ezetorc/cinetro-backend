@@ -4,6 +4,6 @@ export type SwaggerConfig = {
   title: string
   description: string
   version: string
-  bearerAuth: SecuritySchemeObject
   securityRequirements: string
+  bearerAuth?: SecuritySchemeObject
 }

@@ -1,16 +1,25 @@
-const ENV = process.env
+const ENV = process.env as Record<string, any>
 
 export function envConfiguration() {
   return {
-    port: ENV.PORT ? parseInt(ENV.PORT, 10) : 3000,
-    saltRounds: ENV.SALT_ROUNDS ? parseInt(ENV.SALT_ROUNDS) : 10,
+    app: {
+      port: parseInt(ENV.PORT)
+    },
     jwt: {
-      secret: ENV.JWT_SECRET ?? 'defaultSecret',
-      expiresIn: ENV.JWT_EXPIRES_IN || '3600s'
+      secret: ENV.JWT_SECRET,
+      expiresIn: ENV.JWT_EXPIRES_IN,
+      saltRounds: parseInt(ENV.SALT_ROUNDS)
     },
     redis: {
-      host: ENV.REDIS_HOST || 'localhost',
-      port: ENV.REDIS_PORT ? parseInt(ENV.REDIS_PORT, 10) : 6379
+      host: ENV.REDIS_HOST,
+      port: parseInt(ENV.REDIS_PORT)
+    },
+    mysql: {
+      host: ENV.MYSQL_HOST,
+      port: parseInt(ENV.MYSQL_PORT),
+      user: ENV.MYSQL_USER,
+      password: ENV.MYSQL_PASSWORD,
+      database: ENV.MYSQL_DATABASE
     }
   }
 }

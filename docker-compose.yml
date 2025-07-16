@@ -1,0 +1,43 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - '${MYSQL_PORT}:${MYSQL_PORT}'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    container_name: redis
+    image: redis:7
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    volumes:
+      - redis:/data
+
+  api:
+    build: .
+    container_name: api
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${MYSQL_URL}
+      REDIS_URL: 'redis://redis:${REDIS_PORT}'
+      REDIS_HOST: redis
+      MYSQL_HOST: mysql
+    ports:
+      - '${HOST_PORT}:${PORT}'
+    depends_on:
+      - mysql
+      - redis
+
+volumes:
+  mysql_data:
+  redis:

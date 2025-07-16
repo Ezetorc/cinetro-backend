@@ -20,7 +20,7 @@ import { TicketsService } from 'src/tickets/tickets.service'
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('jwt.secret'),
-        signOptions: { expiresIn: '24h' }
+        signOptions: { expiresIn: configService.getOrThrow<string>('jwt.expiresIn') }
       })
     })
   ],

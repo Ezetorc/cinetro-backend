@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: ${MYSQL_URL}
+      REDIS_URL: 'redis://${REDIS_HOST}:${REDIS_PORT}'
+      REDIS_HOST: ${REDIS_HOST}
+      MYSQL_HOST: ${MYSQL_HOST}
+    command: npm run start:dev
+    ports:
+      - '${HOST_PORT}:${PORT}'
+    restart: no

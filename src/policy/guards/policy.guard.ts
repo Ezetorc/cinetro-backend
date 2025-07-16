@@ -20,20 +20,26 @@ export class PolicyGuard implements CanActivate {
       if (request.user.isAdmin) {
         return true
       } else {
-        return this.handleAuthenticatedAccess(action, resource, request.user)
+        return this.hasAuthenticatedAccess(action, resource, request.user)
       }
     } else {
-      return this.handleUnauthenticatedAccess(action, resource)
+      return this.hasUnauthenticatedAccess(action, resource)
     }
   }
 
-  handleAuthenticatedAccess(action: Action, resource: Resource, user: JWTUser) {
-    const rule = user.getRule(action, resource)
+  hasAuthenticatedAccess(action: Action, resource: Resource, user: JWTUser) {
+    const unauthenticatedHasAccess = this.hasUnauthenticatedAccess(action, resource)
 
-    return Boolean(rule)
+    if (unauthenticatedHasAccess) {
+      return true
+    } else {
+      const rule = user.getRule(action, resource)
+
+      return Boolean(rule)
+    }
   }
 
-  handleUnauthenticatedAccess(action: Action, resource: Resource) {
+  hasUnauthenticatedAccess(action: Action, resource: Resource) {
     const rule = policy.getRule({ roleName: 'anyone', action, resource })
 
     return Boolean(rule)

@@ -16,7 +16,6 @@ import { envConfiguration } from './configuration/env.configuration'
 import { envValidation } from './configuration/env.validation'
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { UserRolesModule } from './user-roles/user-roles.module'
-import { PolicyModule } from './policy/policy.module'
 import { PolicyGuard } from './policy/guards/policy.guard'
 import { JwtGuard } from './auth/guards/jwt.guard'
 import { MovieCategoriesModule } from './movie-categories/movie-categories.module'
@@ -59,7 +58,6 @@ import { MovieCategoriesModule } from './movie-categories/movie-categories.modul
       errorMessage: 'Too many requests'
     }),
     UserRolesModule,
-    PolicyModule,
     MovieCategoriesModule
   ],
   providers: [
