@@ -9,7 +9,8 @@ import {
   Param,
   ParseIntPipe,
   ForbiddenException,
-  Req
+  Req,
+  UnauthorizedException
 } from '@nestjs/common'
 import { TicketsService } from './tickets.service'
 import { CreateTicketDto } from './dto/create-ticket.dto'
@@ -24,7 +25,7 @@ import { Request } from 'express'
 
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(private ticketsService: TicketsService) {}
 
   @Post()
   @UsePolicy('create', 'ticket')
@@ -34,14 +35,14 @@ export class TicketsController {
   }
 
   @Get('own')
-  @ApiDescription('Unauthorized', HttpStatus.UNAUTHORIZED)
+  @ApiDescription('You are not logged', HttpStatus.UNAUTHORIZED)
   @ApiDescription('Returns an array of user tickets', HttpStatus.OK)
   @UsePolicy('read', 'ticket:own')
   getOwn(@Req() request: Request) {
     if (request.user) {
       return this.ticketsService.getOfUser(request.user.id)
     } else {
-      return null
+      throw new UnauthorizedException('You are not logged')
     }
   }
 

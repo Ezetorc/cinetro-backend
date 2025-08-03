@@ -11,7 +11,7 @@ import { UsePolicy } from 'src/policy/decorators/use-policy.decorator'
 
 @Controller('seats')
 export class SeatsController {
-  constructor(private readonly seatsService: SeatsService) {}
+  constructor(private seatsService: SeatsService) {}
 
   @Post()
   @UsePolicy('create', 'seat')

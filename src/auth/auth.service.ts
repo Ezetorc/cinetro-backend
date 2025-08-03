@@ -3,11 +3,12 @@ import {
   ConflictException,
   forwardRef,
   Inject,
-  Injectable
+  Injectable,
+  NotFoundException
 } from '@nestjs/common'
 import { UsersService } from 'src/users/users.service'
 import { JwtService } from '@nestjs/jwt'
-import * as bcrypt from 'bcrypt'
+import { compare, hash } from 'bcrypt'
 import { LoginUserDto } from './dto/login-user.dto'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { ConfigService } from '@nestjs/config'
@@ -20,63 +21,53 @@ import { JWTUser } from 'src/users/entities/jwt-user.entity'
 export class AuthService {
   constructor(
     @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly userRolesService: UserRolesService
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+    private userRolesService: UserRolesService
   ) {}
 
-  sign(user: UserWithRoles): string {
-    return this.jwtService.sign(new JWTUser(user).toPlain(), {
-      secret: this.configService.getOrThrow('jwt.secret')
-    })
+  getAuthorization(user: UserWithRoles) {
+    const payload = new JWTUser(user).toPlain()
+    const secret = this.configService.getOrThrow('jwt.secret')
+
+    return this.jwtService.sign(payload, { secret })
   }
 
-  async hash(str: string): Promise<string> {
-    return await bcrypt.hash(str, this.configService.getOrThrow('jwt.saltRounds'))
+  async hash(str: string) {
+    return await hash(str, this.configService.getOrThrow('jwt.saltRounds'))
   }
 
-  async login(loginDto: LoginUserDto) {
-    const user = await this.usersService.getByEmail(loginDto.email, 'withRoles')
+  async login(data: LoginUserDto) {
+    const user = await this.usersService.getByEmail(data.email, 'withRoles')
 
-    if (!user) return null
+    if (!user) throw new NotFoundException("User doesn't exist")
 
-    const passwordMatches = await bcrypt.compare(loginDto.password, user.password)
+    const passwordMatches = await compare(data.password, user.password)
 
-    if (!passwordMatches) return null
+    if (!passwordMatches) throw new BadRequestException('Invalid credentials')
 
-    const token = this.sign(user)
+    const authorization = this.getAuthorization(user)
 
-    return { token, user }
+    return { authorization, user }
   }
 
   async register(data: RegisterUserDto) {
-    const userAlreadyExists = await this.usersService.exists(data.email)
+    const userExists = await this.usersService.exists(data.email)
 
-    if (userAlreadyExists) throw new ConflictException('Email already in use')
+    if (userExists) throw new ConflictException('Email already in use')
 
     const hashedPassword = await this.hash(data.password)
     const user = await this.usersService.create(
-      {
-        ...data,
-        role: RoleName.USER,
-        password: hashedPassword
-      },
+      { ...data, role: RoleName.USER, password: hashedPassword },
       'withRoles'
     )
 
     if (!user) throw new BadRequestException()
 
-    for (const role of user.roles) {
-      await this.userRolesService.create({
-        cinemaId: role.cinemaId,
-        roleName: role.name,
-        userId: user.id
-      })
-    }
+    await this.userRolesService.createUserRolesOf(user)
+    const authorization = this.getAuthorization(user)
 
-    const token = this.sign(user)
-
-    return { user, token }
+    return { user, authorization }
   }
 }

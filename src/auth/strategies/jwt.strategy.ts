@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy, ExtractJwt } from 'passport-jwt'
-import { tryTo } from 'src/common/utilities/try-to.utility'
 import { JWTUser } from 'src/users/entities/jwt-user.entity'
 import { UsersService } from 'src/users/users.service'
 
@@ -19,13 +18,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(payload: { id: number }) {
-    const [user, error] = await tryTo(this.usersService.getById(payload.id, 'withRoles'))
-
-    if (error || !user) {
-      return null
-    } else {
+  async validate(payload: { id: number }): Promise<JWTUser> {
+    try {
+      const user = await this.usersService.getById(payload.id, 'withRoles')
       return new JWTUser(user)
+    } catch {
+      throw new UnauthorizedException('Invalid token or user not found')
     }
   }
 }

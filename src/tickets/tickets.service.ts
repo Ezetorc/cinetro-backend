@@ -1,63 +1,54 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateTicketDto } from './dto/create-ticket.dto'
 import { UpdateTicketDto } from './dto/update-ticket.dto'
 import { PrismaService } from '../common/services/prisma.service'
-import { catchTo } from 'src/common/utilities/catch-to.utility'
+import { Ticket } from '@prisma/client'
 
 @Injectable()
 export class TicketsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) {}
 
-  async create(data: CreateTicketDto) {
-    return await catchTo(this.prismaService.ticket.create({ data }))
+  async create(data: CreateTicketDto): Promise<Ticket> {
+    try {
+      return await this.prismaService.ticket.create({ data })
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
   }
 
-  async getOfUser(userId: number) {
+  async getOfUser(userId: number): Promise<Ticket[]> {
     return await this.prismaService.ticket.findMany({ where: { userId } })
   }
 
-  async getOfUserWithCinemaId(userId: number) {
-    const tickets = await this.prismaService.ticket.findMany({
-      where: { userId },
-      include: { screening: { include: { room: { select: { cinemaId: true } } } } }
-    })
-
-    return tickets.map((ticket) => {
-      const { screening: _, ...rest } = ticket
-
-      return { ...rest, cinemaId: ticket.screening.room.cinemaId }
-    })
-  }
-
-  async getAllOfCinema(cinemaId: number) {
+  async getAllOfCinema(cinemaId: number): Promise<Ticket[]> {
     return await this.prismaService.ticket.findMany({
       where: { screening: { room: { cinemaId } } }
     })
   }
 
-  async getById(id: number) {
-    return await this.prismaService.ticket.findUnique({ where: { id } })
+  async getById(id: number): Promise<Ticket> {
+    const ticket = await this.prismaService.ticket.findUnique({ where: { id } })
+
+    if (ticket) {
+      return ticket
+    } else {
+      throw new NotFoundException(`Ticket with id "${id}" not found`)
+    }
   }
 
-  async getByIdWithCinemaId(id: number) {
-    const ticket = await this.prismaService.ticket.findUnique({
-      where: { id },
-      include: { screening: { include: { room: { select: { cinemaId: true } } } } }
-    })
-
-    if (!ticket) return null
-
-    const { screening: _, ...rest } = ticket
-
-    return { ...rest, cinemaId: ticket.screening.room.cinemaId }
+  async update(id: number, data: UpdateTicketDto): Promise<Ticket> {
+    try {
+      return await this.prismaService.ticket.update({ where: { id }, data })
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
   }
 
-  async update(id: number, data: UpdateTicketDto) {
-    return await catchTo(this.prismaService.ticket.update({ where: { id }, data }))
-  }
-
-  async delete(id: number) {
-    return await catchTo(this.prismaService.ticket.delete({ where: { id } }))
+  async delete(id: number): Promise<Ticket> {
+    try {
+      return await this.prismaService.ticket.delete({ where: { id } })
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
   }
 }

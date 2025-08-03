@@ -1,27 +1,54 @@
+import { RoleName } from './../common/enums/role-name.enum'
 import { Injectable } from '@nestjs/common'
 import { CreateUserRoleDto } from './dto/create-user-role.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
-import { RoleName } from 'src/common/enums/role-name.enum'
-import { User } from '@prisma/client'
+import { User, UserRole } from '@prisma/client'
 import { Roles } from 'src/common/types/roles.type'
 import { UpdateUserRoleDto } from './dto/update-user-role.dto'
-import { catchTo } from 'src/common/utilities/catch-to.utility'
+import { DeleteUserRoleDto } from './dto/delete-user-role.dto'
+import { UserWithRoles } from 'src/users/entities/user-with-roles.entity'
 
 @Injectable()
 export class UserRolesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) {}
 
-  async create(data: CreateUserRoleDto) {
-    return await catchTo(this.prismaService.userRole.create({ data }))
+  async create(data: CreateUserRoleDto): Promise<UserRole> {
+    try {
+      return await this.prismaService.userRole.create({ data })
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
   }
 
-  async update(data: UpdateUserRoleDto) {
-    return await catchTo(
-      this.prismaService.userRole.update({
+  async update(data: UpdateUserRoleDto): Promise<UserRole> {
+    try {
+      return this.prismaService.userRole.update({
         where: { userId_roleName: { userId: data.userId, roleName: data.roleName } },
         data
       })
-    )
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
+  }
+
+  async delete(data: DeleteUserRoleDto): Promise<UserRole> {
+    try {
+      return this.prismaService.userRole.delete({
+        where: { userId_roleName: { userId: data.userId, roleName: data.roleName } }
+      })
+    } catch (error) {
+      this.prismaService.throw(error)
+    }
+  }
+
+  async createUserRolesOf(user: UserWithRoles): Promise<void> {
+    for (const role of user.roles) {
+      await this.create({
+        cinemaId: role.cinemaId,
+        roleName: role.name,
+        userId: user.id
+      })
+    }
   }
 
   async getRolesOf(user: User): Promise<Roles>

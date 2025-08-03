@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Delete, HttpStatus } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Delete,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
@@ -21,7 +31,7 @@ export class UsersController {
     if (user) {
       return new SanitizedUser(user)
     } else {
-      return null
+      throw new InternalServerErrorException("Couldn't create user")
     }
   }
 
@@ -45,7 +55,7 @@ export class UsersController {
     if (user) {
       return new SanitizedUser(user)
     } else {
-      return null
+      throw new NotFoundException('User not found')
     }
   }
 
@@ -60,7 +70,7 @@ export class UsersController {
     if (user) {
       return new SanitizedUser(user)
     } else {
-      return null
+      throw new InternalServerErrorException("Couldn't update user")
     }
   }
 
@@ -75,7 +85,7 @@ export class UsersController {
     if (user) {
       return new SanitizedUser(user)
     } else {
-      return null
+      throw new InternalServerErrorException("Couldn't delete user")
     }
   }
 }

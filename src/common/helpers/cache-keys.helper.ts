@@ -44,4 +44,12 @@ export class CacheKeys {
   static PAGINATED_CATEGORIES(paginationDto?: PaginationDto) {
     return this._getWithPagination('categories', paginationDto)
   }
+
+  static PAGINATED_SEATS(paginationDto?: PaginationDto) {
+    return this._getWithPagination('seats', paginationDto)
+  }
+
+  static SEAT(id: number) {
+    return this._getWithId('seat', id)
+  }
 }

@@ -3,9 +3,10 @@ import { SeatsService } from './seats.service'
 import { SeatsController } from './seats.controller'
 import { PrismaService } from 'src/common/services/prisma.service'
 import { TicketsService } from 'src/tickets/tickets.service'
+import { CacheService } from 'src/common/services/cache.service'
 
 @Module({
   controllers: [SeatsController],
-  providers: [SeatsService, PrismaService, TicketsService]
+  providers: [SeatsService, PrismaService, TicketsService, CacheService]
 })
 export class SeatsModule {}

@@ -1,8 +1,17 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common'
 import { PrismaClient } from '@prisma/client'
 import { PaginateParams } from '../types/paginate-params.type'
 import { PaginateResponse } from '../types/paginate-response.type'
 import { ModelDelegate } from '../types/model-delegate.type'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -16,6 +25,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy() {
     await this.$disconnect()
+  }
+
+  throw(error: unknown): never {
+    if (error instanceof PrismaClientKnownRequestError) {
+      switch (error.code) {
+        case 'P2025':
+          throw new NotFoundException('Record not found')
+        case 'P2002':
+          throw new ConflictException('Duplicate record')
+        case 'P2003':
+          throw new BadRequestException('Invalid foreign key')
+      }
+    }
+
+    throw new InternalServerErrorException('Unexpected error')
   }
 
   async paginate<T = undefined>(params: PaginateParams): Promise<PaginateResponse<T>> {

@@ -10,7 +10,7 @@ import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private categoriesService: CategoriesService) {}
 
   @Post()
   @UsePolicy('create', 'category')

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateMovieDto } from './dto/create-movie.dto'
 import { UpdateMovieDto } from './dto/update-movie.dto'
 import { PrismaService } from 'src/common/services/prisma.service'
@@ -7,31 +7,38 @@ import { PaginationDto } from 'src/common/dto/pagination-args.dto'
 import { MoviePreview } from './entities/movie-preview.entity'
 import { CacheService } from '../common/services/cache.service'
 import { CacheKeys } from 'src/common/helpers/cache-keys.helper'
-import { catchTo } from 'src/common/utilities/catch-to.utility'
-import { tryTo } from 'src/common/utilities/try-to.utility'
 import { MovieWithCategories } from './entities/movie-with-categories'
 import { MovieWithRowCategories } from './entities/movie-with-row-categories.entity'
+import { Movie } from '@prisma/client'
+import { PaginateResponse } from 'src/common/types/paginate-response.type'
 
 @Injectable()
 export class MoviesService {
   constructor(
-    private readonly prismaService: PrismaService,
-    private readonly movieCategoriesService: MovieCategoriesService,
-    private readonly cacheService: CacheService
+    private prismaService: PrismaService,
+    private movieCategoriesService: MovieCategoriesService,
+    private cacheService: CacheService
   ) {}
 
-  async create(data: CreateMovieDto) {
+  async create(data: CreateMovieDto): Promise<Movie> {
     const { categories, ...rest } = data
-    const [newMovie] = await tryTo(this.prismaService.movie.create({ data: rest }))
 
-    if (categories && newMovie) {
-      return await catchTo(this.movieCategoriesService.addToMovie(newMovie, categories))
-    } else {
+    return await this.prismaService.$transaction(async (transaction) => {
+      const newMovie = await transaction.movie.create({ data: rest })
+
+      if (categories?.length) {
+        await this.movieCategoriesService.addToMovieWithTransaction(
+          transaction,
+          newMovie,
+          categories
+        )
+      }
+
       return newMovie
-    }
+    })
   }
 
-  async getAllForPreview(paginationDto?: PaginationDto) {
+  async getAllForPreview(paginationDto?: PaginationDto): Promise<PaginateResponse<MoviePreview>> {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_MOVIES_PREVIEW(paginationDto),
       ttl: '1h',
@@ -44,7 +51,7 @@ export class MoviesService {
     })
   }
 
-  async getAll(paginationDto?: PaginationDto) {
+  async getAll(paginationDto?: PaginationDto): Promise<PaginateResponse<Movie>> {
     return await this.cacheService.cached({
       key: CacheKeys.PAGINATED_MOVIES(paginationDto),
       ttl: '1h',
@@ -67,7 +74,7 @@ export class MoviesService {
     })
   }
 
-  async getById(id: number) {
+  async getById(id: number): Promise<MovieWithCategories> {
     return await this.cacheService.cached({
       key: CacheKeys.MOVIE(id),
       ttl: '5m',
@@ -80,32 +87,40 @@ export class MoviesService {
         if (movie) {
           return this._getWithCategories(movie)
         } else {
-          return null
+          throw new NotFoundException(`Movie with id ${id} not found`)
         }
       }
     })
   }
 
-  async update(id: number, data: UpdateMovieDto) {
+  async update(id: number, data: UpdateMovieDto): Promise<Movie> {
     const { categories, ...rest } = data
-    const [updatedMovie] = await tryTo(
-      this.prismaService.movie.update({ where: { id }, data: rest })
-    )
 
-    if (categories && updatedMovie) {
-      await this.movieCategoriesService.delete(id)
+    return await this.prismaService.$transaction(async (tx) => {
+      const updatedMovie = await tx.movie.update({ where: { id }, data: rest })
 
-      return await catchTo(this.movieCategoriesService.addToMovie(updatedMovie, categories))
-    } else {
+      if (categories?.length) {
+        await tx.movieCategory.deleteMany({ where: { movieId: id } })
+        const dataToInsert = categories.map((category) => ({ movieId: id, categoryName: category }))
+        await tx.movieCategory.createMany({ data: dataToInsert })
+      }
+
       return updatedMovie
+    })
+  }
+
+  async delete(id: number): Promise<Movie> {
+    try {
+      const movie = this.prismaService.movie.delete({ where: { id } })
+      await this.cacheService.delete(CacheKeys.MOVIE(id))
+
+      return movie
+    } catch (error) {
+      this.prismaService.throw(error)
     }
   }
 
-  async delete(id: number) {
-    return await catchTo(this.prismaService.movie.delete({ where: { id } }))
-  }
-
-  private _getWithCategories(movie: MovieWithRowCategories) {
+  private _getWithCategories(movie: MovieWithRowCategories): MovieWithCategories {
     const { categories, ...rest } = movie
     const finalCategories = categories.map((category) => category.categoryName)
 
